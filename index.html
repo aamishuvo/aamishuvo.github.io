@@ -3,439 +3,229 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#08171F">
 
-<!-- ═══ EDIT: page title + description (shows in Google results & browser tab) ═══ -->
-<title>Shuvo — Program Management | Telecom Digital Delivery</title>
-<meta name="description" content="Program Management Manager at Banglalink Digital Communications. Ten years delivering telecom, logistics, and e-governance programs under PMO governance.">
-<meta property="og:title" content="Shuvo — Program Management">
+<title>Md. Mahmudul Islam — Program Management | Telecom Digital Delivery</title>
+<meta name="description" content="Program Management Manager at Banglalink Digital Communications (VEON Group). Ten years delivering telecom, logistics and e-governance programs under PMO governance.">
+<meta property="og:title" content="Md. Mahmudul Islam — Program Management">
 <meta property="og:description" content="Ten years turning ambiguous programs into dated, measurable go-lives.">
-<meta property="og:type" content="website">
+<meta property="og:image" content="assets/img/portrait.webp">
+<meta property="og:type" content="profile">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Literata:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-
-<style>
-/* ═══════════════ TOKENS ═══════════════ */
-:root{
-  --paper:#EBEAE5;
-  --paper-deep:#DFDED7;
-  --ink:#17181B;
-  --ink-soft:#5C5E60;
-  --rule:#C7C5BC;
-  --signal:#1E5A48;      /* delivered / current */
-  --inert:#9B9E9A;       /* historical / baseline */
-
-  --display:'Archivo',system-ui,sans-serif;
-  --body:'Literata',Georgia,serif;
-  --mono:'IBM Plex Mono',ui-monospace,monospace;
-
-  --gut:clamp(20px,5vw,64px);
-  --max:1180px;
-}
-
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{
-  background:var(--paper);color:var(--ink);
-  font-family:var(--body);font-size:clamp(16px,1.05vw,18px);line-height:1.62;
-  -webkit-font-smoothing:antialiased;
-}
-.wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gut)}
-
-a{color:inherit}
-:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:2px}
-.skip{position:absolute;left:-9999px}
-.skip:focus{left:var(--gut);top:12px;z-index:99;background:var(--ink);color:var(--paper);padding:10px 16px}
-
-/* ═══════════════ SHARED ═══════════════ */
-.eyebrow{
-  font-family:var(--mono);font-size:11px;font-weight:500;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);
-}
-.rule{height:1px;background:var(--rule);border:0}
-
-/* ═══════════════ TOP BAR ═══════════════ */
-.topbar{
-  border-bottom:1px solid var(--rule);
-  position:sticky;top:0;z-index:40;
-  background:color-mix(in srgb,var(--paper) 88%,transparent);
-  backdrop-filter:blur(8px);
-}
-.topbar .wrap{
-  display:flex;justify-content:space-between;align-items:center;
-  gap:16px;padding-block:13px;
-}
-.topbar nav{display:flex;gap:clamp(14px,2.5vw,28px)}
-.topbar nav a{text-decoration:none;transition:color .2s}
-.topbar nav a:hover{color:var(--signal)}
-
-/* ═══════════════ HERO ═══════════════ */
-.hero{padding-block:clamp(52px,9vw,104px) clamp(40px,6vw,64px)}
-.hero h1{
-  font-family:var(--display);font-weight:800;
-  font-size:clamp(58px,15.5vw,182px);
-  line-height:.82;letter-spacing:-.035em;
-  text-transform:uppercase;margin-block:26px 0;
-}
-.hero h1 .lit{color:var(--signal)}
-.lede{
-  font-size:clamp(17px,1.5vw,21px);line-height:1.55;
-  max-width:44ch;margin-top:clamp(26px,3.5vw,38px);color:var(--ink-soft);
-}
-.lede strong{color:var(--ink);font-weight:500}
-
-/* ═══════════════ GANTT — the signature ═══════════════ */
-.chart{margin-top:clamp(46px,6vw,76px)}
-.chart-head{
-  display:flex;justify-content:space-between;align-items:baseline;
-  gap:16px;padding-bottom:10px;flex-wrap:wrap;
-}
-.axis{
-  position:relative;height:18px;
-  border-bottom:1px solid var(--rule);margin-bottom:14px;
-}
-.tick{
-  position:absolute;bottom:0;transform:translateX(-50%);
-  font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);
-  padding-bottom:4px;white-space:nowrap;
-}
-.tick::after{
-  content:"";position:absolute;left:50%;bottom:-1px;
-  width:1px;height:5px;background:var(--rule);
-}
-.row{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:center;padding-block:9px}
-.row-label{font-family:var(--mono);font-size:12px;letter-spacing:.03em}
-.row-label small{display:block;color:var(--ink-soft);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase}
-.track{position:relative;height:19px;background:var(--paper-deep);border-radius:1px}
-.bar{
-  position:absolute;top:0;height:100%;border-radius:1px;
-  background:var(--inert);
-  transform:scaleX(0);transform-origin:left center;
-  transition:transform .85s cubic-bezier(.2,.75,.25,1);
-  transition-delay:var(--d,0ms);
-}
-.bar.now{background:var(--signal)}
-.chart.go .bar{transform:scaleX(1)}
-.bar-cap{
-  position:absolute;right:0;top:50%;transform:translate(calc(100% + 9px),-50%);
-  font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);white-space:nowrap;
-  opacity:0;transition:opacity .4s ease;transition-delay:calc(var(--d,0ms) + 700ms);
-}
-.chart.go .bar-cap{opacity:1}
-
-/* ═══════════════ SECTIONS ═══════════════ */
-.band{border-top:1px solid var(--rule);padding-block:clamp(52px,7vw,92px)}
-.band h2{
-  font-family:var(--display);font-weight:700;
-  font-size:clamp(28px,4.2vw,50px);line-height:1;
-  letter-spacing:-.02em;text-transform:uppercase;margin-top:14px;
-}
-
-/* ═══ Spine + gates ═══ */
-.spine{margin-top:clamp(34px,4.5vw,56px);border-left:1px solid var(--rule);padding-left:clamp(22px,3.5vw,42px)}
-.gate{position:relative;padding-bottom:clamp(38px,5vw,58px)}
-.gate:last-child{padding-bottom:0}
-.gate::before{
-  content:"";position:absolute;
-  left:calc(-1 * clamp(22px,3.5vw,42px) - 5px);top:9px;
-  width:9px;height:9px;border-radius:50%;
-  background:var(--paper);border:1.5px solid var(--signal);
-}
-.gate.done::before{background:var(--signal)}
-.gate-meta{display:flex;gap:14px;flex-wrap:wrap;align-items:baseline}
-.gate h3{
-  font-family:var(--display);font-weight:700;font-size:clamp(20px,2.4vw,28px);
-  line-height:1.15;letter-spacing:-.015em;margin-block:9px 12px;
-}
-.gate p{max-width:62ch;color:var(--ink-soft)}
-.gate p + p{margin-top:11px}
-.outcome{
-  display:inline-flex;align-items:baseline;gap:11px;
-  margin-top:17px;padding-top:13px;border-top:1px solid var(--rule);
-}
-.outcome b{
-  font-family:var(--display);font-weight:800;
-  font-size:clamp(26px,3.4vw,40px);line-height:1;
-  letter-spacing:-.03em;color:var(--signal);
-}
-.outcome span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);max-width:22ch}
-
-/* ═══ Method grid ═══ */
-.grid{display:grid;gap:1px;background:var(--rule);margin-top:clamp(30px,4vw,46px);border:1px solid var(--rule)}
-@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
-.cell{background:var(--paper);padding:clamp(20px,2.6vw,30px)}
-.cell h4{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--signal);margin-bottom:11px}
-.cell p{font-size:15.5px;color:var(--ink-soft);line-height:1.55}
-
-/* ═══ Facts ═══ */
-.facts{margin-top:clamp(30px,4vw,44px);display:grid;gap:0}
-.fact{display:grid;grid-template-columns:132px 1fr;gap:20px;padding-block:14px;border-top:1px solid var(--rule)}
-.fact:last-child{border-bottom:1px solid var(--rule)}
-.fact dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);padding-top:4px}
-.fact dd{font-size:16px}
-
-/* ═══ Contact ═══ */
-.contact{border-top:1px solid var(--rule);padding-block:clamp(56px,8vw,104px)}
-.mailto{
-  display:inline-block;font-family:var(--display);font-weight:800;
-  font-size:clamp(27px,6.2vw,74px);line-height:1;letter-spacing:-.035em;
-  text-decoration:none;margin-block:20px 8px;
-  word-break:break-word;transition:color .25s;
-}
-.mailto:hover{color:var(--signal)}
-.links{display:flex;gap:26px;flex-wrap:wrap;margin-top:26px}
-.links a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:3px;transition:border-color .2s,color .2s}
-.links a:hover{color:var(--signal);border-color:var(--signal)}
-
-footer{border-top:1px solid var(--rule);padding-block:24px}
-footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-
-/* ═══ Scroll reveal ═══ */
-.rise{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.75,.25,1)}
-.rise.seen{opacity:1;transform:none}
-
-/* ═══ Mobile ═══ */
-@media(max-width:640px){
-  .row{grid-template-columns:1fr;gap:7px}
-  .bar-cap{display:none}
-  .fact{grid-template-columns:1fr;gap:3px}
-  .topbar nav{display:none}
-}
-
-@media(prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-  html{scroll-behavior:auto}
-  .bar{transform:scaleX(1)}
-  .bar-cap,.rise{opacity:1;transform:none}
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;900&family=Manrope:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="topbar">
-  <div class="wrap">
-    <!-- ═══ EDIT: your name ═══ -->
-    <span class="eyebrow">Shuvo — Dhaka, BD</span>
-    <nav>
-      <a class="eyebrow" href="#work">Work</a>
-      <a class="eyebrow" href="#method">Method</a>
-      <a class="eyebrow" href="#contact">Contact</a>
+<!-- signal-strength scroll indicator -->
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<!-- animated coverage field -->
+<canvas id="field" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <div class="shell">
+    <a class="mark" href="#top" aria-label="Home">MI<span>·</span></a>
+    <nav aria-label="Primary">
+      <a href="#work">Work</a>
+      <a href="#method">Method</a>
+      <a href="#contact">Contact</a>
     </nav>
+    <span class="status"><i></i>Open to conversations</span>
   </div>
 </header>
 
 <main id="main">
 
-<!-- ══════════ HERO ══════════ -->
-<section class="hero wrap">
-  <!-- ═══ EDIT: your current role ═══ -->
-  <p class="eyebrow">Program Management Manager · Banglalink Digital Communications (VEON Group)</p>
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero" id="top">
+  <div class="glow" aria-hidden="true"></div>
 
-  <h1>Programs<br>go <span class="lit">live.</span></h1>
+  <h1 class="bigname" aria-label="Md. Mahmudul Islam">
+    <span>MAHMUDUL</span>
+    <span>ISLAM</span>
+  </h1>
 
-  <p class="lede">
-    Ten years turning ambiguous telecom, logistics, and e-governance programs into
-    <strong>dated, measurable go-lives</strong> — under PMO governance, reported to CEO and ExCo.
-  </p>
+  <img class="portrait" src="assets/img/portrait.webp"
+       width="760" height="1269" fetchpriority="high"
+       alt="Md. Mahmudul Islam">
 
-  <!-- ─── SIGNATURE: career gantt. Edit the data array near the bottom of this file. ─── -->
-  <div class="chart" id="chart">
-    <div class="chart-head">
-      <span class="eyebrow">Track record</span>
-      <span class="eyebrow" id="chartRange"></span>
-    </div>
-    <div class="axis" id="axis"></div>
-    <div id="rows" role="img" aria-label="Timeline of roles across e-governance, logistics, and telecom sectors"></div>
+  <div class="shell hero-foot">
+    <p class="tag">
+      Program Management Manager<br>
+      <b>Banglalink Digital Communications</b> — VEON Group
+    </p>
+    <p class="tag right">
+      Dhaka, Bangladesh<br>
+      <b>10+ years</b> — telecom · logistics · e-governance
+    </p>
+  </div>
+
+  <span class="cue" aria-hidden="true">SCROLL</span>
+</section>
+
+<!-- ══════════════ MARQUEE ══════════════ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>PMO Governance ✦ eTOM Process Design ✦ Programme Delivery ✦ ExCo Reporting ✦ Business Process Re-engineering ✦ UAT to Go-Live ✦ Vendor Governance ✦ Digital Platform Launch ✦</span>
+    <span>PMO Governance ✦ eTOM Process Design ✦ Programme Delivery ✦ ExCo Reporting ✦ Business Process Re-engineering ✦ UAT to Go-Live ✦ Vendor Governance ✦ Digital Platform Launch ✦</span>
+  </div>
+</div>
+
+<!-- ══════════════ NUMBERS ══════════════ -->
+<section class="metrics shell" aria-label="Key figures">
+  <div class="metric reveal">
+    <b class="count" data-to="10" data-suffix="+">0</b>
+    <span>Years delivering</span>
+  </div>
+  <div class="metric reveal">
+    <b class="count" data-to="64">0</b>
+    <span>Districts reached at D2D launch</span>
+  </div>
+  <div class="metric reveal">
+    <b class="count" data-to="500" data-suffix="+">0</b>
+    <span>Thanas covered nationwide</span>
+  </div>
+  <div class="metric reveal">
+    <b class="count" data-to="3">0</b>
+    <span>Sectors — telecom, logistics, e-gov</span>
   </div>
 </section>
 
-<!-- ══════════ WORK ══════════ -->
-<section class="band" id="work">
-  <div class="wrap">
-    <p class="eyebrow">Selected programs</p>
-    <h2>What shipped</h2>
+<!-- ══════════════ WORK ══════════════ -->
+<section class="block shell" id="work">
+  <p class="eyebrow">Selected programmes</p>
+  <h2 class="head">What<br>shipped</h2>
 
-    <div class="spine">
+  <div class="stack">
 
-      <!-- ─── GATE 1 ─── -->
-      <article class="gate done rise">
-        <div class="gate-meta">
-          <span class="eyebrow">2026 · Banglalink</span>
-          <span class="eyebrow" style="color:var(--signal)">Live</span>
+    <!-- ── 01 ── -->
+    <article class="prog reveal" data-open>
+      <button class="prog-bar" aria-expanded="true" aria-controls="p1">
+        <span class="idx">01</span>
+        <span class="prog-name">D2D — nationwide door-to-door digital services</span>
+        <span class="chip live">Live · Jul 2026</span>
+        <span class="caret" aria-hidden="true"></span>
+      </button>
+      <div class="prog-body" id="p1">
+        <div class="prog-inner">
+          <p>One platform consolidating SIM services, FWA, MNP, transfer of ownership and device
+             ordering — with automated rider assignment behind it. I ran delivery governance across
+             product, IT, commercial and field operations, from UAT sign-off through to launch.</p>
+          <ul class="pills">
+            <li>Cross-functional governance</li><li>UAT sign-off</li>
+            <li>Launch readiness</li><li>Field ops integration</li>
+          </ul>
+          <p class="result">Same-day fulfilment for orders placed before noon, across all 64 districts.</p>
         </div>
-        <h3>D2D — nationwide door-to-door digital services</h3>
-        <p>
-          A single platform consolidating SIM services, FWA, MNP, transfer of ownership, and device
-          ordering, with automated rider assignment behind it. I ran delivery governance across
-          product, IT, commercial, and field operations — UAT sign-off through launch.
-        </p>
-        <p>
-          Launched July 2026 with same-day fulfilment for orders placed before noon.
-        </p>
-        <div class="outcome">
-          <b>64</b><span>Districts covered · 500+ thanas at launch</span>
-        </div>
-      </article>
+      </div>
+    </article>
 
-      <!-- ─── GATE 2 ─── -->
-      <article class="gate done rise">
-        <div class="gate-meta">
-          <span class="eyebrow">2025–26 · Banglalink</span>
-          <span class="eyebrow">Governance</span>
+    <!-- ── 02 ── -->
+    <article class="prog reveal">
+      <button class="prog-bar" aria-expanded="false" aria-controls="p2">
+        <span class="idx">02</span>
+        <span class="prog-name">Approval throughput — rebuilding the decision pipeline</span>
+        <span class="chip">Governance · 2025–26</span>
+        <span class="caret" aria-hidden="true"></span>
+      </button>
+      <div class="prog-body" id="p2">
+        <div class="prog-inner">
+          <p>Analysed two years of corporate document-approval records, then reframed the question:
+             rank bottlenecks by <em>delay-days held</em>, not by ticket volume. That inverted which
+             approval stages actually mattered — and the PMO recommendations followed the delay
+             rather than the noise.</p>
+          <ul class="pills">
+            <li>Data analysis</li><li>Bottleneck modelling</li>
+            <li>PMO recommendations</li><li>CEO reporting</li>
+          </ul>
+          <!-- ═══ CLEAR THIS FIGURE INTERNALLY BEFORE PUBLISHING ═══ -->
+          <p class="result">Turnaround time down 42% year over year.</p>
         </div>
-        <h3>Approval throughput — rebuilding the decision pipeline</h3>
-        <p>
-          Analysed the full corporate document-approval record across two years, then reframed the
-          problem: rank bottlenecks by delay-days held, not by ticket volume. That flipped which
-          approval stages actually mattered, and the PMO recommendations followed the delay, not the noise.
-        </p>
-        <!-- ═══ CLEAR THIS FIGURE INTERNALLY BEFORE PUBLISHING ═══ -->
-        <div class="outcome">
-          <b>42%</b><span>Turnaround time reduced, year over year</span>
-        </div>
-      </article>
+      </div>
+    </article>
 
-      <!-- ─── GATE 3 ─── -->
-      <article class="gate rise">
-        <div class="gate-meta">
-          <span class="eyebrow">2026 · Banglalink × BTCL</span>
-          <span class="eyebrow">In flight</span>
+    <!-- ── 03 ── -->
+    <article class="prog reveal">
+      <button class="prog-bar" aria-expanded="false" aria-controls="p3">
+        <span class="idx">03</span>
+        <span class="prog-name">MVNO partnership — scope, journeys and regulatory path</span>
+        <span class="chip">In flight · 2026</span>
+        <span class="caret" aria-hidden="true"></span>
+      </button>
+      <div class="prog-body" id="p3">
+        <div class="prog-inner">
+          <p>Built the business scope for a state-operator MVNO partnership: cross-operator
+             after-sales routing, the number-portability journey, and a customer onboarding flow
+             with regulatory validation designed in from the start rather than bolted on afterwards.</p>
+          <ul class="pills">
+            <li>Business scoping</li><li>Journey design</li>
+            <li>Regulatory alignment</li><li>Partner governance</li>
+          </ul>
+          <p class="result">Regulatory checkpoints embedded directly in the onboarding flow.</p>
         </div>
-        <h3>MVNO partnership — scope, journeys, and regulatory path</h3>
-        <p>
-          Built the business scope for a state-operator MVNO partnership: cross-operator after-sales
-          routing, the number-portability journey, and a customer onboarding flow with the regulatory
-          validation steps designed in rather than bolted on afterwards.
-        </p>
-        <div class="outcome">
-          <b>4</b><span>Regulatory checkpoints embedded in onboarding</span>
-        </div>
-      </article>
+      </div>
+    </article>
 
-    </div>
   </div>
 </section>
 
-<!-- ══════════ METHOD ══════════ -->
-<section class="band" id="method">
-  <div class="wrap">
-    <p class="eyebrow">How I work</p>
-    <h2>Method</h2>
+<!-- ══════════════ METHOD ══════════════ -->
+<section class="block shell" id="method">
+  <p class="eyebrow">How I work</p>
+  <h2 class="head">Method</h2>
 
-    <div class="grid rise">
-      <div class="cell">
-        <h4>Governance</h4>
-        <p>PMO structures that survive contact with reality — RAID discipline, gate criteria agreed before the gate, and status that reports the truth on a bad week.</p>
-      </div>
-      <div class="cell">
-        <h4>Process re-engineering</h4>
-        <p>Mapping and rebuilding operational flows against eTOM, so the redesign is auditable against a standard instead of one team's preference.</p>
-      </div>
-      <div class="cell">
-        <h4>Executive reporting</h4>
-        <p>CEO and ExCo material that leads with the decision needed. One slide, the ask visible, the supporting data one layer down.</p>
-      </div>
+  <div class="cells">
+    <div class="cell reveal">
+      <h3>Governance</h3>
+      <p>PMO structures that survive contact with reality. RAID discipline, gate criteria agreed
+         before the gate, and status that still reports the truth on a bad week.</p>
     </div>
-
-    <dl class="facts rise">
-      <div class="fact"><dt>Sectors</dt><dd>Telecom · Logistics · E-governance</dd></div>
-      <!-- ═══ EDIT: confirm employer list and order ═══ -->
-      <div class="fact"><dt>Track</dt><dd>Banglalink Digital Communications (VEON Group) · Paperfly · Synesis IT</dd></div>
-      <div class="fact"><dt>Education</dt><dd>B.Sc. in Electrical &amp; Electronic Engineering, Stamford University Bangladesh</dd></div>
-      <div class="fact"><dt>Based</dt><dd>Dhaka, Bangladesh</dd></div>
-    </dl>
+    <div class="cell reveal">
+      <h3>Process re-engineering</h3>
+      <p>Operational flows mapped and rebuilt against eTOM, so the redesign is auditable against a
+         standard instead of one team's preference.</p>
+    </div>
+    <div class="cell reveal">
+      <h3>Executive reporting</h3>
+      <p>CEO and ExCo material that leads with the decision needed. One slide, the ask visible,
+         the supporting data one layer down.</p>
+    </div>
   </div>
+
+  <dl class="facts reveal">
+    <div><dt>Currently</dt><dd>Program Management Manager, Banglalink Digital Communications Ltd. (VEON Group)</dd></div>
+    <!-- ═══ EDIT: confirm employers and order against your LinkedIn ═══ -->
+    <div><dt>Previously</dt><dd>Paperfly · Synesis IT</dd></div>
+    <div><dt>Education</dt><dd>B.Sc. in Electrical &amp; Electronic Engineering — Stamford University Bangladesh</dd></div>
+    <div><dt>Based</dt><dd>Dhaka, Bangladesh</dd></div>
+  </dl>
 </section>
 
-<!-- ══════════ CONTACT ══════════ -->
-<section class="contact" id="contact">
-  <div class="wrap">
-    <p class="eyebrow">Open to conversations about program delivery</p>
-    <!-- ═══ EDIT: your real email, in both places ═══ -->
-    <a class="mailto" href="mailto:you@example.com">you@example.com</a>
-    <div class="links">
-      <!-- ═══ EDIT: your real links. Delete any you don't want. ═══ -->
-      <a href="https://linkedin.com/in/yourhandle">LinkedIn</a>
-      <a href="https://github.com/aamishuvo">GitHub</a>
-      <a href="cv.pdf">Download CV</a>
-    </div>
+<!-- ══════════════ CONTACT ══════════════ -->
+<section class="block contact shell" id="contact">
+  <p class="eyebrow">Get in touch</p>
+  <!-- ═══ EDIT: your real email ═══ -->
+  <a class="mailto" href="mailto:you@example.com">you@example.com</a>
+  <div class="links">
+    <a href="https://www.linkedin.com/in/iamshuvo/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/aamishuvo" target="_blank" rel="noopener">GitHub</a>
+    <!-- ═══ EDIT: upload cv.pdf to the repo root, or delete this link ═══ -->
+    <a href="cv.pdf">Download CV</a>
   </div>
 </section>
 
 </main>
 
-<footer>
-  <div class="wrap">
-    <span class="eyebrow">Shuvo · Dhaka</span>
-    <span class="eyebrow">Updated 2026</span>
-  </div>
+<footer class="shell">
+  <span>Md. Mahmudul Islam — Dhaka</span>
+  <span>Built and hosted on GitHub Pages</span>
 </footer>
 
-<script>
-/* ════════════════════════════════════════════════════════════
-   EDIT YOUR TIMELINE HERE — this is the only data to change.
-   "to" can be a year, or the word "now".
-   set now:true on your current role so it draws in green.
-   ════════════════════════════════════════════════════════════ */
-const ROLES = [
-  { label:'Synesis IT',  sector:'E-governance', from:2014, to:2018 },
-  { label:'Paperfly',    sector:'Logistics',    from:2018, to:2021 },
-  { label:'Banglalink',  sector:'Telecom',      from:2021, to:'now', now:true }
-];
-
-(function(){
-  const END = new Date().getFullYear();
-  const span = ROLES.map(r => r.to === 'now' ? END : r.to);
-  const MIN = Math.min(...ROLES.map(r => r.from));
-  const MAX = Math.max(...span, END);
-  const pct = y => ((y - MIN) / (MAX - MIN)) * 100;
-
-  document.getElementById('chartRange').textContent = MIN + ' — ' + MAX;
-
-  // year ticks
-  const axis = document.getElementById('axis');
-  const step = (MAX - MIN) > 9 ? 3 : 2;
-  for (let y = MIN; y <= MAX; y += step) {
-    const t = document.createElement('span');
-    t.className = 'tick';
-    t.style.left = pct(y) + '%';
-    t.textContent = y;
-    axis.appendChild(t);
-  }
-
-  // rows
-  const rows = document.getElementById('rows');
-  ROLES.forEach((r, i) => {
-    const end = r.to === 'now' ? END : r.to;
-    rows.insertAdjacentHTML('beforeend', `
-      <div class="row">
-        <div class="row-label">${r.label}<small>${r.sector}</small></div>
-        <div class="track">
-          <div class="bar ${r.now ? 'now' : ''}"
-               style="left:${pct(r.from)}%;width:${pct(end) - pct(r.from)}%;--d:${i * 150}ms">
-            <span class="bar-cap">${r.from}–${r.to === 'now' ? 'now' : r.to}</span>
-          </div>
-        </div>
-      </div>`);
-  });
-
-  // draw once visible
-  const chart = document.getElementById('chart');
-  new IntersectionObserver((e, o) => {
-    if (e[0].isIntersecting) { chart.classList.add('go'); o.disconnect(); }
-  }, { threshold: .25 }).observe(chart);
-
-  // scroll reveal
-  const io = new IntersectionObserver((entries, o) => {
-    entries.forEach(en => {
-      if (en.isIntersecting) { en.target.classList.add('seen'); o.unobserve(en.target); }
-    });
-  }, { threshold: .15, rootMargin: '0px 0px -40px' });
-  document.querySelectorAll('.rise').forEach(el => io.observe(el));
-})();
-</script>
+<script src="assets/js/main.js" defer></script>
 </body>
 </html>

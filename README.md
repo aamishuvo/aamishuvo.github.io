@@ -51,6 +51,30 @@ Open `https://aamishuvo.github.io/admin/` (or `/admin/` on any deployment).
 | Blog posts | `src/content/blog/en/*.md`, `src/content/blog/bn/*.md` |
 | Images | `public/assets/img/` |
 
+### Using a realistic 3D avatar (your own face)
+
+The hero character has two modes. By default it renders a built-in low-poly figure
+(jeans, tee, open blazer) drawn entirely in code. To replace it with a realistic
+cartoon avatar of yourself:
+
+1. Go to **readyplayer.me**, choose **Create Avatar**, and upload a selfie. It builds a
+   rigged 3D character from your photo — pick the outfit closest to what you want.
+2. Download the avatar as a **`.glb`** file (Ready Player Me offers a direct `.glb`
+   download; alternatively append `.glb` to the avatar URL it gives you).
+3. In `/admin/` → **Settings** → **Avatar model** → **Upload…**, select that `.glb`.
+   It is committed to `public/assets/models/` and the path is filled in for you.
+4. Save & publish. The site loads your model instead of the built-in figure.
+
+The model keeps every behaviour: the head follows the cursor, it dances in Zero
+Bullshit mode, it blinks, and on phones you can drag to turn it and tap to make it
+dance. Blinking and smiling use the model's blendshapes when it has them.
+
+Requirements for the model: rigged humanoid, bones named in the common convention
+(`Head`, `Neck`, `Spine`, `LeftArm`, `RightArm`, `LeftForeArm`, `RightForeArm`,
+`LeftUpLeg`, `RightUpLeg` — a `mixamorig:` prefix is fine). Keep it under ~10 MB so
+the page stays fast. If the file fails to load, the site silently falls back to the
+built-in figure.
+
 ### Lead capture
 
 Quiz leads open a pre-filled email to `contactEmail` by default. To capture leads silently as well, set `leadEndpoint` in `src/data/settings.json` (Settings tab in the admin) to a form endpoint such as [Formspree](https://formspree.io) — the quiz will POST name, email, score, and answers there.

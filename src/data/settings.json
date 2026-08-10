@@ -5,14 +5,46 @@
   "linkedin": "https://www.linkedin.com/in/iamshuvo/",
   "github": "",
   "social": [
-    { "platform": "linkedin", "label": "LinkedIn", "url": "https://www.linkedin.com/in/iamshuvo/" },
-    { "platform": "github", "label": "GitHub", "url": "" },
-    { "platform": "facebook", "label": "Facebook", "url": "" },
-    { "platform": "x", "label": "X", "url": "" },
-    { "platform": "whatsapp", "label": "WhatsApp", "url": "" },
-    { "platform": "instagram", "label": "Instagram", "url": "" },
-    { "platform": "telegram", "label": "Telegram", "url": "" },
-    { "platform": "youtube", "label": "YouTube", "url": "" }
+    {
+      "platform": "linkedin",
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/iamshuvo/"
+    },
+    {
+      "platform": "github",
+      "label": "GitHub",
+      "url": ""
+    },
+    {
+      "platform": "facebook",
+      "label": "Facebook",
+      "url": ""
+    },
+    {
+      "platform": "x",
+      "label": "X",
+      "url": ""
+    },
+    {
+      "platform": "whatsapp",
+      "label": "WhatsApp",
+      "url": "https://wa.me/8801717291435"
+    },
+    {
+      "platform": "instagram",
+      "label": "Instagram",
+      "url": ""
+    },
+    {
+      "platform": "telegram",
+      "label": "Telegram",
+      "url": ""
+    },
+    {
+      "platform": "youtube",
+      "label": "YouTube",
+      "url": ""
+    }
   ],
   "cvUrl": ""
 }

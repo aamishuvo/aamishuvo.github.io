@@ -40,7 +40,7 @@
     },
     "scroll": "SCROLL",
     "availability": {
-      "employed": "Full-time at Banglalink",
+      "employed": "Full-timer @ Banglalink",
       "available": "Open to work",
       "break": "On a break from corporate life"
     }
@@ -250,10 +250,22 @@
     ],
     "principlesTitle": "Four things I believe",
     "principles": [
-      { "title": "Bad news travels first", "body": "A programme is only as healthy as its willingness to report a bad week honestly. Permanently green status is not good news — it is missing information." },
-      { "title": "Measure what stakeholders feel", "body": "Volume is what your process shows you; time is what people experience. Count the days held, not the tickets closed." },
-      { "title": "Design the constraint in", "body": "Regulatory validation, field realities and vendor limits belong in the design on day one. Bolted on at the end, they become the reason you miss the date." },
-      { "title": "The ask goes on top", "body": "Executives need the decision first and the evidence second. If your recommendation is on slide 34, it is not a recommendation." }
+      {
+        "title": "Bad news travels first",
+        "body": "A programme is only as healthy as its willingness to report a bad week honestly. Permanently green status is not good news — it is missing information."
+      },
+      {
+        "title": "Measure what stakeholders feel",
+        "body": "Volume is what your process shows you; time is what people experience. Count the days held, not the tickets closed."
+      },
+      {
+        "title": "Design the constraint in",
+        "body": "Regulatory validation, field realities and vendor limits belong in the design on day one. Bolted on at the end, they become the reason you miss the date."
+      },
+      {
+        "title": "The ask goes on top",
+        "body": "Executives need the decision first and the evidence second. If your recommendation is on slide 34, it is not a recommendation."
+      }
     ],
     "nowTitle": "What I'm exploring now",
     "nowBody": "Where artificial intelligence genuinely belongs in programme governance — not as a dashboard gimmick, but for the unglamorous work: surfacing risks buried in status reports, spotting where approvals silently stall, and drafting the executive summary nobody has time to write.",

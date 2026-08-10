@@ -165,18 +165,38 @@
   "education": {
     "eyebrow": "Foundations",
     "head": "Where the thinking came from",
+    "eduTitle": "Education",
     "items": [
       {
         "logo": "/assets/img/stamford-university-bangladesh-logo-png-seeklogo-649100.png",
         "credential": "B.Sc. in Electrical & Electronic Engineering",
         "org": "Stamford University Bangladesh",
-        "period": "2010 - 2014"
+        "period": "2010 - 2014",
+        "url": ""
       },
       {
         "logo": "/assets/img/logo-of-government-azizul-haque-college.png",
         "credential": "Higher Secondary Certification",
         "org": "Govt. Azizul Haque College Bogra",
-        "period": ""
+        "period": "",
+        "url": ""
+      }
+    ],
+    "certTitle": "Certifications",
+    "certs": [
+      {
+        "logo": "",
+        "credential": "Google Project Management Professional Certificate",
+        "org": "Google · Coursera",
+        "period": "",
+        "url": ""
+      },
+      {
+        "logo": "",
+        "credential": "HackerOne Certification",
+        "org": "HackerOne",
+        "period": "",
+        "url": ""
       }
     ]
   },

@@ -162,7 +162,31 @@
      Recursively renders a friendly form for any JSON structure.
      Inputs write straight back into the in-memory object; Save commits it. */
 
+  // Friendlier names for keys whose raw form reads badly in the form.
+  const LABELS = {
+    items: 'Education entries',
+    certs: 'Certifications',
+    eduTitle: 'Education column heading',
+    certTitle: 'Certifications column heading',
+    credential: 'Title (degree or certificate)',
+    org: 'Institution / issuer',
+    period: 'Year or period',
+    url: 'Credential link (optional)',
+    logo: 'Logo',
+    rows: 'Track record rows',
+    programmes: 'Projects',
+    focus: 'Strategic focus',
+    impact: 'Impact tag',
+    zb: 'Zero Bullshit / Chill mode text',
+    normal: 'Normal text',
+    avatarModel: 'Avatar model (.glb)',
+    aboutPhoto: 'About page photo',
+    leadEndpoint: 'Lead capture endpoint (optional)',
+    nameLines: 'Name (one line each)'
+  };
+
   const label = (key) =>
+    LABELS[key] ||
     String(key).replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]/g, ' ')
       .replace(/^./, (c) => c.toUpperCase());
 

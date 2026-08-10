@@ -4,6 +4,7 @@ import settings from '../data/settings.json';
 import postits from '../data/postits.json';
 import quiz from '../data/quiz.json';
 import Social from './Social.astro';
+import Credential from './Credential.astro';
 
 interface Props { lang: 'en' | 'bn'; t: any; }
 const { lang, t } = Astro.props;
@@ -154,20 +155,21 @@ const boardClient = {
   <section class="block shell" id="education">
     <p class="eyebrow">{t.education.eyebrow}</p>
     <h2 class="head">{t.education.head}</h2>
-    <div class="edu-list">
-      {t.education.items.map((e: any) => (
-        <article class="edu-item reveal">
-          <span class="org-logo" aria-hidden="true">
-            {e.logo
-              ? <img src={e.logo} alt="" loading="lazy" />
-              : <span class="org-logo-fallback">{String(e.org || '?').trim().charAt(0)}</span>}
-          </span>
-          <div class="edu-main">
-            <h3>{e.credential}</h3>
-            <p class="edu-org">{e.org}{e.period ? ` · ${e.period}` : ''}</p>
+    <div class="found-grid">
+      <div class="found-col">
+        <h3 class="found-title">{t.education.eduTitle || 'Education'}</h3>
+        <div class="edu-list">
+          {(t.education.items || []).map((e: any) => <Credential item={e} />)}
+        </div>
+      </div>
+      {(t.education.certs || []).length > 0 && (
+        <div class="found-col">
+          <h3 class="found-title">{t.education.certTitle || 'Certifications'}</h3>
+          <div class="edu-list">
+            {t.education.certs.map((c: any) => <Credential item={c} />)}
           </div>
-        </article>
-      ))}
+        </div>
+      )}
     </div>
   </section>
 )}

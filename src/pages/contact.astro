@@ -1,0 +1,8 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactPage from '../components/ContactPage.astro';
+import t from '../data/en.json';
+---
+<Base lang="en" title={`Contact — ${t.meta.title}`} description={t.contactPage.lead} t={t}>
+  <ContactPage lang="en" t={t} />
+</Base>

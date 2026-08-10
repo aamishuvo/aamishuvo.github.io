@@ -1,0 +1,8 @@
+---
+import Base from '../../layouts/Base.astro';
+import About from '../../components/About.astro';
+import t from '../../data/bn.json';
+---
+<Base lang="bn" title={`পরিচিতি — ${t.meta.title}`} description={t.about.lead} t={t}>
+  <About lang="bn" t={t} />
+</Base>

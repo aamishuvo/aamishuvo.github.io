@@ -1,0 +1,69 @@
+---
+import Social from './Social.astro';
+import settings from '../data/settings.json';
+
+interface Props { lang: 'en' | 'bn'; t: any; }
+const { lang, t } = Astro.props;
+const c = t.contactPage;
+const avail = (settings as any).availability || 'employed';
+
+const formConfig = {
+  endpoint: settings.leadEndpoint || '',
+  email: settings.contactEmail,
+  sending: c.sending,
+  send: c.send,
+  sentTitle: c.sentTitle,
+  sentBody: c.sentBody,
+  mailFallback: c.mailFallback
+};
+---
+<section class="page-head shell">
+  <p class="eyebrow">{c.eyebrow}</p>
+  <h1 class="page-title">{c.title}</h1>
+  <p class="page-lead">{c.lead}</p>
+  {t.hero.availability && (
+    <div class={`avail ${avail}`} role="status">
+      <i></i><span>{t.hero.availability[avail]}</span>
+    </div>
+  )}
+</section>
+
+<section class="block shell contact-grid">
+  <div class="contact-side">
+    <div class="contact-block">
+      <p class="eyebrow">{c.emailLabel}</p>
+      <a class="mailto" href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>
+    </div>
+    <div class="contact-block">
+      <p class="eyebrow">{c.socialLabel}</p>
+      <Social size="lg" />
+    </div>
+    <div class="contact-block">
+      <p class="eyebrow">{c.responseTitle}</p>
+      <p class="contact-note">{c.responseBody}</p>
+    </div>
+    <div class="contact-block">
+      <p class="eyebrow">{c.bringTitle}</p>
+      <ul class="bring-list">
+        {c.bring.map((b: string) => <li>{b}</li>)}
+      </ul>
+    </div>
+  </div>
+
+  <div class="contact-form-wrap">
+    <h2 class="form-title">{c.formTitle}</h2>
+    <form class="contact-form" id="contactForm" novalidate>
+      <label>{c.fName}<input name="name" required autocomplete="name" /></label>
+      <label>{c.fEmail}<input name="email" type="email" required autocomplete="email" /></label>
+      <label>{c.fOrg}<input name="org" autocomplete="organization" /></label>
+      <label>{c.fMessage}<textarea name="message" rows="6" required></textarea></label>
+      <button class="btn" type="submit">{c.send}</button>
+      <p class="form-status" id="formStatus" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<script type="application/json" id="formConfig" set:html={JSON.stringify(formConfig)}></script>
+<script>
+  import '../scripts/contact.js';
+</script>

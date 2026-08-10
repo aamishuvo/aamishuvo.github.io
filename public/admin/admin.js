@@ -179,7 +179,9 @@
     impact: 'Impact tag',
     zb: 'Zero Bullshit / Chill mode text',
     normal: 'Normal text',
-    avatarModel: 'Avatar model (.glb)',
+    avatarModel: 'Avatar: 3D model (.glb) — highest priority',
+    avatarImage: 'Avatar: illustration or photo (PNG) — used if no 3D model',
+    avatarImageCutout: 'Remove a plain white background from the avatar image',
     aboutPhoto: 'About page photo',
     leadEndpoint: 'Lead capture endpoint (optional)',
     nameLines: 'Name (one line each)'

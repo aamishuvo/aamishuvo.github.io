@@ -4,6 +4,8 @@
   "leadEndpoint": "",
   "aboutPhoto": "/assets/img/portrait.webp",
   "avatarModel": "",
+  "avatarImage": "",
+  "avatarImageCutout": true,
   "sections": {
     "showTrack": true,
     "showMetrics": true,

@@ -64,7 +64,10 @@ const boardClient = {
         <span class="status"><i></i><span data-zb-alt={t.hero.status.zb}>{t.hero.status.normal}</span></span>
       </div>
     </div>
-    <div class="stage" id="stage" aria-hidden="true" data-model={(settings as any).avatarModel || ''}>
+    <div class="stage" id="stage" aria-hidden="true"
+      data-model={(settings as any).avatarModel || ''}
+      data-image={(settings as any).avatarImage || ''}
+      data-cutout={String((settings as any).avatarImageCutout !== false)}>
       <span class="stage-hint" id="stageHint"></span>
     </div>
   </div>

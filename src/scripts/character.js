@@ -11,6 +11,7 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 const stage = document.getElementById('stage');
 if (stage) init(stage);
@@ -28,23 +29,34 @@ function init(stage) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // filmic tone mapping — soft highlight rolloff instead of clipped whites
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
   stage.prepend(renderer.domElement);
 
+  // ── studio environment: soft image-based lighting for believable materials ──
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  // the environment supplies reflections and soft bounce only — the key light
+  // still shapes the figure, so keep its contribution low or everything flattens
+  scene.environmentIntensity = 0.3;
+
   // ── lights ──
-  scene.add(new THREE.HemisphereLight(0xfff4e4, 0x6e6a5c, 1.0));
-  const key = new THREE.DirectionalLight(0xffffff, 1.85);
-  key.position.set(3, 6, 4);
+  scene.add(new THREE.HemisphereLight(0xfff4e4, 0x6e6a5c, 0.35));
+  const key = new THREE.DirectionalLight(0xfff6ea, 2.1);
+  key.position.set(3.2, 6, 4.5);
   key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
+  key.shadow.mapSize.set(2048, 2048);
   key.shadow.camera.left = -3; key.shadow.camera.right = 3;
   key.shadow.camera.top = 5; key.shadow.camera.bottom = -1;
-  key.shadow.radius = 6;
+  key.shadow.radius = 8;
+  key.shadow.bias = -0.0006;
   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xcfe4ff, 0.55);
-  fill.position.set(-3, 2, 3);
+  const fill = new THREE.DirectionalLight(0xd6e8ff, 0.7);
+  fill.position.set(-3.5, 2.2, 3);
   scene.add(fill);
-  const rim = new THREE.DirectionalLight(0xe6432d, 0.9);
-  rim.position.set(-4, 3, -4);
+  const rim = new THREE.DirectionalLight(0xe6432d, 1.5);
+  rim.position.set(-3.5, 4, -4.5);
   scene.add(rim);
 
   const ground = new THREE.Mesh(
@@ -64,23 +76,27 @@ function init(stage) {
 
   /* ═══════════════ built-in figure ═══════════════ */
   function buildFigure() {
-    const M = (color, rough = 0.75, opts = {}) =>
-      new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: 0.03, ...opts });
+    const P = (opts) => new THREE.MeshPhysicalMaterial({ metalness: 0, ...opts });
 
-    const blazer = M(0x33383f, 0.85);
-    const blazerDark = M(0x282c33, 0.88);
-    const tee = M(0xb9bcc0, 0.9);
-    const denim = M(0x5b7ea8, 0.9);
-    const denimDark = M(0x4a6a90, 0.9);
-    const skin = M(0xa9744f, 0.55);
-    const skinDark = M(0x94603d, 0.6);
-    const hair = M(0x171310, 0.95);
-    const dark = M(0x14161a, 0.6);
-    const white = M(0xf7f4ec, 0.35);
-    const iris = M(0x3a2415, 0.4);
-    const frameMat = M(0x3c2d1d, 0.35, { metalness: 0.35 });
-    const soleMat = M(0xe8e5dd, 0.7);
-    const sneaker = M(0x6f7378, 0.85);
+    // woven cloth: matte, with a soft sheen at grazing angles
+    const cloth = (color, rough, sheenColor) => P({
+      color, roughness: rough, sheen: 0.55, sheenRoughness: 0.75, sheenColor
+    });
+    const blazer = cloth(0x2b3038, 0.88, 0x93a3b8);
+    const blazerDark = cloth(0x21252c, 0.9, 0x7f8ea3);
+    const tee = cloth(0xa9adb2, 0.95, 0xffffff);
+    const denim = cloth(0x47678d, 0.93, 0x9fc0e0);
+    const denimDark = cloth(0x3b587b, 0.94, 0x8fb0d4);
+    // skin: slight clearcoat reads as the natural sheen of skin
+    const skin = P({ color: 0xac7853, roughness: 0.62, clearcoat: 0.3, clearcoatRoughness: 0.62, sheen: 0.25, sheenColor: 0xff9c74 });
+    const skinDark = P({ color: 0x976542, roughness: 0.66, clearcoat: 0.22, clearcoatRoughness: 0.65 });
+    const hair = P({ color: 0x191512, roughness: 0.5, clearcoat: 0.55, clearcoatRoughness: 0.42 });
+    const dark = P({ color: 0x15171b, roughness: 0.55 });
+    const white = P({ color: 0xf8f6f0, roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.15 });
+    const iris = P({ color: 0x3d2716, roughness: 0.25, clearcoat: 0.8, clearcoatRoughness: 0.1 });
+    const frameMat = P({ color: 0x40301f, roughness: 0.3, metalness: 0.45, clearcoat: 0.5 });
+    const soleMat = P({ color: 0xeceae3, roughness: 0.65 });
+    const sneaker = cloth(0x74787e, 0.88, 0xb8c2cc);
 
     const cast = (m) => { m.castShadow = true; return m; };
     const cap = (r, len, mat) => cast(new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 18), mat));
@@ -156,13 +172,25 @@ function init(stage) {
       const elbow = new THREE.Group(); elbow.position.y = -0.56;
       const fore = cap(0.085, 0.34, blazer); fore.position.y = -0.23;
       const cuff = cyl(0.088, 0.088, 0.05, tee); cuff.position.y = -0.42;
-      const hand = sph(0.09, skin, 18, 14);
-      hand.scale.set(1, 1.15, 0.75);
-      hand.position.y = -0.5;
-      const thumb = cap(0.028, 0.05, skin);
-      thumb.position.set(0.06 * side, -0.46, 0.03);
-      thumb.rotation.z = -0.7 * side;
-      elbow.add(fore, cuff, hand, thumb);
+
+      // hand: palm + four curled fingers + an opposed thumb
+      const hand = new THREE.Group();
+      hand.position.y = -0.47;
+      const palm = cast(new THREE.Mesh(new THREE.SphereGeometry(0.072, 18, 14), skin));
+      palm.scale.set(1, 1.1, 0.62);
+      hand.add(palm);
+      for (let i = 0; i < 4; i++) {
+        const f = cap(0.019, 0.055, skin);
+        f.position.set((i - 1.5) * 0.031, -0.085, 0.006);
+        f.rotation.x = 0.32 + i * 0.04;
+        hand.add(f);
+      }
+      const thumb = cap(0.022, 0.038, skin);
+      thumb.position.set(0.055 * side, -0.035, 0.028);
+      thumb.rotation.set(0.3, 0, -0.85 * side);
+      hand.add(thumb);
+
+      elbow.add(fore, cuff, hand);
       sh.add(upper, elbow);
       sh.userData.elbow = elbow;
       return sh;
@@ -253,6 +281,63 @@ function init(stage) {
       height: 3.0,
       parts: { torso, head, armL, armR, legL, legR, eyeL, eyeR }
     };
+  }
+
+  /* ═══════════════ 2.5D artwork avatar ═══════════════
+     An illustrated portrait on a subtly curved plane. It keeps the artwork's own
+     shading (so a rendered/painted avatar looks exactly as drawn) and tilts toward
+     the pointer for parallax. Optionally keys out a flat white backdrop. */
+  function loadImageAvatar(url, cutout) {
+    return new Promise((resolve, reject) => {
+      new THREE.TextureLoader().load(url, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        const iw = tex.image.width || 1, ih = tex.image.height || 1;
+        const height = 3.0;
+        const width = height * (iw / ih);
+
+        // a gentle cylindrical bow gives the flat artwork a sense of volume
+        const geo = new THREE.PlaneGeometry(width, height, 32, 32);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i) / (width / 2);
+          pos.setZ(i, -0.18 * x * x);
+        }
+        geo.computeVertexNormals();
+
+        const mat = new THREE.MeshBasicMaterial({
+          map: tex, transparent: true, alphaTest: 0.02, toneMapped: false
+        });
+        if (cutout) {
+          mat.onBeforeCompile = (shader) => {
+            shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <alphatest_fragment>',
+              `{
+                 float mx = max(diffuseColor.r, max(diffuseColor.g, diffuseColor.b));
+                 float mn = min(diffuseColor.r, min(diffuseColor.g, diffuseColor.b));
+                 if (mx > 0.88 && (mx - mn) < 0.10) discard;
+               }
+               #include <alphatest_fragment>`
+            );
+          };
+        }
+
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = height / 2;
+
+        // soft contact shadow, since a plane cannot cast a believable one
+        const blob = new THREE.Mesh(
+          new THREE.CircleGeometry(width * 0.28, 32),
+          new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.13, toneMapped: false })
+        );
+        blob.rotation.x = -Math.PI / 2;
+        blob.position.y = 0.01;
+
+        const root = new THREE.Group();
+        root.add(mesh, blob);
+        resolve({ kind: 'image', root, mesh, blob, height });
+      }, undefined, reject);
+    });
   }
 
   /* ═══════════════ rigged .glb ═══════════════ */
@@ -359,9 +444,18 @@ function init(stage) {
   }
   new ResizeObserver(resize).observe(stage);
 
+  // Priority: rigged model → illustrated portrait → built-in figure.
   const modelUrl = (stage.dataset.model || '').trim();
-  (modelUrl ? loadModel(modelUrl).catch(() => buildFigure()) : Promise.resolve(buildFigure()))
-    .then((subject) => run(subject));
+  const imageUrl = (stage.dataset.image || '').trim();
+  const cutout = stage.dataset.cutout !== 'false';
+
+  const pick = modelUrl
+    ? loadModel(modelUrl).catch(() => (imageUrl ? loadImageAvatar(imageUrl, cutout) : buildFigure()))
+    : imageUrl
+      ? loadImageAvatar(imageUrl, cutout).catch(() => buildFigure())
+      : Promise.resolve(buildFigure());
+
+  pick.then((subject) => run(subject)).catch(() => run(buildFigure()));
 
   function run(subject) {
     scene.add(subject.root);
@@ -414,7 +508,19 @@ function init(stage) {
 
       const breathe = Math.sin(t * 1.5) * 0.012;
 
-      if (subject.kind === 'figure') {
+      if (subject.kind === 'image') {
+        // parallax tilt toward the pointer, a slow idle float, and a beat bounce
+        const m = subject.mesh;
+        m.rotation.y += ((hx * 0.3) - m.rotation.y) * Math.min(1, dt * 4);
+        m.rotation.x += ((hy * 0.13) - m.rotation.x) * Math.min(1, dt * 4);
+        m.rotation.z = lerp(Math.sin(t * 0.7) * 0.012, swing * 0.07, d);
+        m.position.y = subject.height / 2 + Math.sin(t * 1.25) * 0.035 + Math.abs(swing) * 0.06 * d;
+        m.position.x = lerp(hx * -0.06, swing * 0.09, d);
+        const squash = 1 + Math.sin(beat * Math.PI * 2) * 0.02 * d;
+        m.scale.set(1 / squash, squash, 1);
+        subject.blob.scale.setScalar(1 - (m.position.y - subject.height / 2) * 0.5);
+        subject.blob.material.opacity = 0.13 - (m.position.y - subject.height / 2) * 0.06;
+      } else if (subject.kind === 'figure') {
         const { torso, head, armL, armR, legL, legR, eyeL, eyeR } = subject.parts;
         head.rotation.y += ((hx * 0.55) - head.rotation.y) * Math.min(1, dt * 6);
         head.rotation.x += ((hy * 0.3) - head.rotation.x) * Math.min(1, dt * 6);

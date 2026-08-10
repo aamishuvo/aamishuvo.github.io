@@ -1,0 +1,22 @@
+{
+  "cells": [
+    { "id": "raid", "label": { "en": "RAID log", "bn": "RAID লগ" }, "note": { "en": "Risks nobody wrote down are still risks. They're just surprises now.", "bn": "যে ঝুঁকি কেউ লেখেনি, সেটাও ঝুঁকি। এখন শুধু সেটা 'সারপ্রাইজ'।" }, "color": "yellow" },
+    { "id": "gate", "label": { "en": "Gate criteria", "bn": "গেট মানদণ্ড" }, "note": { "en": "Agree the gate criteria before the gate. Afterwards it's called negotiation.", "bn": "গেটের মানদণ্ড ঠিক করুন গেটের আগে। পরে করলে ওটার নাম দর-কষাকষি।" }, "color": "blue" },
+    { "id": "uat", "label": { "en": "UAT", "bn": "ইউএটি" }, "note": { "en": "UAT sign-off is a promise, not a formality.", "bn": "ইউএটি সাইন-অফ একটা প্রতিশ্রুতি, আনুষ্ঠানিকতা নয়।" }, "color": "pink" },
+    { "id": "rag", "label": { "en": "RAG status", "bn": "RAG স্ট্যাটাস" }, "note": { "en": "A permanently green RAG is a red flag.", "bn": "সবসময় সবুজ RAG আসলে একটা লাল পতাকা।" }, "color": "green" },
+    { "id": "exco", "label": { "en": "ExCo slide", "bn": "এক্সকো স্লাইড" }, "note": { "en": "Lead with the ask. The data lives one layer down.", "bn": "শুরুতেই চাওয়াটা বলুন। ডেটা থাকুক এক স্তর নিচে।" }, "color": "yellow" },
+    { "id": "vendor", "label": { "en": "Vendors", "bn": "ভেন্ডর" }, "note": { "en": "A vendor's plan is a hypothesis until you've governed it.", "bn": "গভর্নেন্সের আগে ভেন্ডরের প্ল্যান কেবল একটা অনুমান।" }, "color": "blue" },
+    { "id": "scope", "label": { "en": "Scope creep", "bn": "স্কোপ ক্রিপ" }, "note": { "en": "Scope creep never announces itself. It arrives as 'just one small thing'.", "bn": "স্কোপ ক্রিপ ঘোষণা দিয়ে আসে না। আসে 'ছোট্ট একটা জিনিস' হয়ে।" }, "color": "pink" },
+    { "id": "golive", "label": { "en": "Go-live", "bn": "গো-লাইভ" }, "note": { "en": "A go-live date without a readiness checklist is a wish.", "bn": "প্রস্তুতির চেকলিস্ট ছাড়া গো-লাইভ তারিখ শুধুই একটা ইচ্ছা।" }, "color": "green" },
+    { "id": "etom", "label": { "en": "eTOM", "bn": "ইটম" }, "note": { "en": "Map the flow against a standard, or you're just documenting opinions.", "bn": "স্ট্যান্ডার্ডের সঙ্গে ফ্লো মেলান — নইলে আপনি শুধু মতামত লিখে রাখছেন।" }, "color": "yellow" },
+    { "id": "delay", "label": { "en": "Delay-days", "bn": "দেরির দিন" }, "note": { "en": "Count the days held, not the tickets. The delay knows where it lives.", "bn": "টিকিট নয়, আটকে থাকা দিন গুনুন। দেরি জানে সে কোথায় থাকে।" }, "color": "blue" },
+    { "id": "field", "label": { "en": "Field ops", "bn": "ফিল্ড অপস" }, "note": { "en": "If it doesn't work in a thana at 2pm on a Tuesday, it doesn't work.", "bn": "মঙ্গলবার দুপুর ২টায় কোনো থানায় যদি না চলে, তাহলে ওটা চলে না।" }, "color": "pink" },
+    { "id": "truth", "label": { "en": "Truth", "bn": "সত্য" }, "note": { "en": "Status that reports the truth on a bad week is worth ten dashboards.", "bn": "খারাপ সপ্তাহে সত্যি বলা এক রিপোর্ট, দশটা ড্যাশবোর্ডের সমান।" }, "color": "green" }
+  ],
+  "pinned": [
+    { "id": "pin1", "text": { "en": "Ship the date you promised.", "bn": "যে তারিখ কথা দিয়েছেন, সেদিনই ডেলিভার করুন।" }, "color": "yellow", "x": 12, "y": 18, "wireTo": "raid" },
+    { "id": "pin2", "text": { "en": "The delay hides in the quiet stages.", "bn": "দেরি লুকিয়ে থাকে চুপচাপ ধাপগুলোতে।" }, "color": "pink", "x": 70, "y": 12, "wireTo": "delay" },
+    { "id": "pin3", "text": { "en": "64 districts. Same day. Before noon.", "bn": "৬৪ জেলা। একই দিনে। দুপুরের আগে।" }, "color": "blue", "x": 45, "y": 65, "wireTo": "golive" },
+    { "id": "pin4", "text": { "en": "One slide. The ask on top.", "bn": "এক স্লাইড। চাওয়াটা ওপরে।" }, "color": "green", "x": 82, "y": 55, "wireTo": "exco" }
+  ]
+}

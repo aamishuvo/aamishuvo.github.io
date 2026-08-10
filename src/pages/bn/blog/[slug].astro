@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import BlogPost from '../../../components/BlogPost.astro';
+import t from '../../../data/bn.json';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', (p) => p.data.lang === 'bn' && !p.data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id.split('/').pop()!.replace(/\.md$/, '') },
+    props: { post }
+  }));
+}
+const { post } = Astro.props;
+---
+<Base lang="bn" title={`${post.data.title} — মো. মাহমুদুল ইসলাম`} description={post.data.description} t={t}>
+  <BlogPost lang="bn" t={t} post={post} />
+</Base>

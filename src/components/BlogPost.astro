@@ -1,0 +1,27 @@
+---
+import { render } from 'astro:content';
+
+interface Props { lang: 'en' | 'bn'; t: any; post: any; }
+const { lang, t, post } = Astro.props;
+const { Content } = await render(post);
+
+const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
+const dateFmt = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { dateStyle: 'long' });
+const words = post.body?.split(/\s+/).length ?? 0;
+const minutes = Math.max(1, Math.round(words / 200));
+const minFmt = new Intl.NumberFormat(lang === 'bn' ? 'bn-BD' : 'en-US').format(minutes);
+---
+<article class="article shell">
+  <a class="back-link" href={blogHref}>{t.blogSection.back}</a>
+  <div class="article-head">
+    <h1>{post.data.title}</h1>
+    <div class="meta">
+      <time datetime={post.data.date.toISOString()}>{dateFmt.format(post.data.date)}</time>
+      <span>{minFmt} {t.blogSection.minRead}</span>
+      {post.data.tags.map((tag: string) => <span>#{tag}</span>)}
+    </div>
+  </div>
+  <div class="article-body">
+    <Content />
+  </div>
+</article>

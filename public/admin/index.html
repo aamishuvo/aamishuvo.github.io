@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Admin — iamshuvo</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <!-- ── login ── -->
+  <div id="login" class="login">
+    <div class="login-card">
+      <h1>MI<span>·</span> Admin</h1>
+      <p class="hint">
+        Sign in with a GitHub <b>fine-grained personal access token</b> that has
+        <b>Contents: Read &amp; write</b> permission on this repository only.
+        The token stays in this browser — it is never sent anywhere except api.github.com.
+      </p>
+      <label>Token
+        <input type="password" id="tokenInput" placeholder="github_pat_…" autocomplete="off">
+      </label>
+      <label>Repository
+        <input type="text" id="repoInput" value="aamishuvo/aamishuvo.github.io">
+      </label>
+      <label>Branch
+        <input type="text" id="branchInput" value="main">
+      </label>
+      <label class="check"><input type="checkbox" id="rememberInput"> Remember on this device</label>
+      <button id="loginBtn" class="btn">Sign in</button>
+      <p id="loginErr" class="err"></p>
+    </div>
+  </div>
+
+  <!-- ── app ── -->
+  <div id="app" class="app" hidden>
+    <header class="topbar">
+      <span class="brand">MI<span>·</span> Admin</span>
+      <nav id="tabs">
+        <button data-tab="site-en" class="on">Site · EN</button>
+        <button data-tab="site-bn">Site · বাংলা</button>
+        <button data-tab="postits">Post-its</button>
+        <button data-tab="quiz">Diagnostic</button>
+        <button data-tab="blog">Blog</button>
+        <button data-tab="settings">Settings</button>
+        <button data-tab="images">Images</button>
+      </nav>
+      <div class="top-actions">
+        <a id="actionsLink" href="#" target="_blank" rel="noopener">Build status ↗</a>
+        <button id="logoutBtn" class="ghost">Sign out</button>
+      </div>
+    </header>
+
+    <main id="panel" class="panel"></main>
+
+    <footer class="statusbar">
+      <span id="status">Ready.</span>
+      <span class="note">Saving commits to the repo → GitHub Actions rebuilds the site (1–2 min).</span>
+    </footer>
+  </div>
+
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+---
+import { getCollection } from 'astro:content';
+import settings from '../data/settings.json';
+import postits from '../data/postits.json';
+import quiz from '../data/quiz.json';
+
+interface Props { lang: 'en' | 'bn'; t: any; }
+const { lang, t } = Astro.props;
+
+const posts = (await getCollection('blog', (p) => p.data.lang === lang && !p.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 2);
+
+const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
+const dateFmt = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { dateStyle: 'medium' });
+
+// Per-language slices of the shared quiz/board config, serialized for the client scripts.
+const quizClient = {
+  ui: Object.fromEntries(Object.entries(quiz.ui).map(([k, v]: [string, any]) => [k, v[lang]])),
+  questions: quiz.questions.map((q: any) => ({
+    id: q.id,
+    q: q.q[lang],
+    options: q.options.map((o: any) => ({ score: o.score, label: o.label[lang] }))
+  })),
+  verdicts: quiz.verdicts.map((v: any) => ({ min: v.min, title: v.title[lang], text: v.text[lang] })),
+  lang,
+  contactEmail: settings.contactEmail,
+  leadEndpoint: settings.leadEndpoint
+};
+const boardClient = {
+  cells: postits.cells.map((c: any) => ({ id: c.id, label: c.label[lang], note: c.note[lang], color: c.color })),
+  pinned: postits.pinned.map((p: any) => ({ id: p.id, text: p.text[lang], color: p.color, x: p.x, y: p.y, wireTo: p.wireTo }))
+};
+---
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero" id="top">
+  <div class="shell hero-grid">
+    <div>
+      <p class="eyebrow">{t.hero.eyebrow}</p>
+      <h1 class="bigname" aria-label={t.hero.nameLines.join(' ')}>
+        {t.hero.nameLines.map((line: string) => <span>{line}</span>)}
+      </h1>
+      <p class="tagline" data-zb-alt={t.hero.tagline.zb}>{t.hero.tagline.normal}</p>
+      <div class="hero-meta">
+        <span>{t.hero.role}</span>
+        <span>{t.hero.company}</span>
+        <span>{t.hero.location}</span>
+        <span>{t.hero.experience}</span>
+        <span class="status"><i></i><span data-zb-alt={t.hero.status.zb}>{t.hero.status.normal}</span></span>
+      </div>
+    </div>
+    <div class="stage" id="stage" aria-hidden="true">
+      <span class="stage-hint" id="stageHint"></span>
+    </div>
+  </div>
+  <span class="cue" aria-hidden="true">{t.hero.scroll}</span>
+</section>
+
+<!-- ══════════════ MARQUEE ══════════════ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>{t.marquee.join(' ✦ ')} ✦&nbsp;</span>
+    <span>{t.marquee.join(' ✦ ')} ✦&nbsp;</span>
+  </div>
+</div>
+
+<!-- ══════════════ METRICS ══════════════ -->
+<section class="metrics shell" aria-label="Key figures">
+  {t.metrics.map((m: any) => (
+    <div class="metric reveal">
+      <b class="count" data-to={m.to} data-suffix={m.suffix}>0</b>
+      <span>{m.label}</span>
+    </div>
+  ))}
+</section>
+
+<!-- ══════════════ WORK ══════════════ -->
+<section class="block shell" id="work">
+  <p class="eyebrow">{t.work.eyebrow}</p>
+  <h2 class="head">{t.work.head}</h2>
+  <div class="stack">
+    {t.work.programmes.map((p: any, i: number) => (
+      <article class="prog reveal">
+        <button class="prog-bar" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`p${i + 1}`}>
+          <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+          <span class="prog-name">{p.name}</span>
+          <span class={p.live ? 'chip live' : 'chip'}>{p.chip}</span>
+          <span class="caret" aria-hidden="true"></span>
+        </button>
+        <div class="prog-body" id={`p${i + 1}`}>
+          <div class="prog-inner">
+            <p data-zb-alt={p.body.zb}>{p.body.normal}</p>
+            <ul class="pills">{p.pills.map((pill: string) => <li>{pill}</li>)}</ul>
+            <p class="result">{p.result}</p>
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<!-- ══════════════ BOARD ══════════════ -->
+<section class="block shell" id="board">
+  <p class="eyebrow">{t.board.eyebrow}</p>
+  <h2 class="head">{t.board.head}</h2>
+  <p class="board-hint">{t.board.hint}</p>
+  <div class="board-wrap">
+    <div class="board" id="boardEl">
+      <div class="board-grid" id="boardGrid"></div>
+      <svg class="wires" id="wires"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ METHOD ══════════════ -->
+<section class="block shell" id="method">
+  <p class="eyebrow">{t.method.eyebrow}</p>
+  <h2 class="head">{t.method.head}</h2>
+  <div class="cells">
+    {t.method.cells.map((c: any) => (
+      <div class="cell reveal">
+        <h3>{c.title}</h3>
+        <p data-zb-alt={c.body.zb}>{c.body.normal}</p>
+      </div>
+    ))}
+  </div>
+  <dl class="facts reveal">
+    {t.method.facts.map((f: any) => (
+      <div><dt>{f.dt}</dt><dd>{f.dd}</dd></div>
+    ))}
+  </dl>
+</section>
+
+<!-- ══════════════ DIAGNOSTIC ══════════════ -->
+<section class="block shell" id="diagnostic">
+  <div class="diag-shell" id="diag">
+    <p class="eyebrow">{quiz.ui.eyebrow[lang]}</p>
+    <h2 class="diag-head">{quiz.ui.head[lang]}</h2>
+    <div id="diagMount">
+      <p class="diag-intro">{quiz.ui.intro[lang]}</p>
+      <button class="btn" id="diagStart">{quiz.ui.start[lang]}</button>
+      <button class="voice-toggle" id="voiceToggle" aria-pressed="true">
+        <span>🔊</span><span>{quiz.ui.voiceLabel[lang]}</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ BLOG ══════════════ -->
+<section class="block shell" id="blog">
+  <p class="eyebrow">{t.blogSection.eyebrow}</p>
+  <h2 class="head">{t.blogSection.head}</h2>
+  <div class="posts">
+    {posts.map((post) => (
+      <a class="post-card reveal" href={`${blogHref}${post.id.split('/').pop()?.replace(/\.md$/, '')}/`}>
+        <time datetime={post.data.date.toISOString()}>{dateFmt.format(post.data.date)}</time>
+        <h3>{post.data.title}</h3>
+        <p>{post.data.description}</p>
+        <div class="tags">{post.data.tags.map((tag) => <span>{tag}</span>)}</div>
+      </a>
+    ))}
+  </div>
+  <a class="all-posts-link" href={blogHref}>{t.blogSection.all} →</a>
+</section>
+
+<!-- ══════════════ CONTACT ══════════════ -->
+<section class="block shell" id="contact">
+  <p class="eyebrow">{t.contact.eyebrow}</p>
+  <p class="contact-head" data-zb-alt={t.contact.head.zb}>{t.contact.head.normal}</p>
+  <a class="mailto" href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>
+  <div class="contact-links">
+    {t.contact.links.map((l: any) => (
+      <a href={(settings as any)[l.key]} target="_blank" rel="noopener">{l.label}</a>
+    ))}
+    {settings.cvUrl && <a href={settings.cvUrl}>CV</a>}
+  </div>
+</section>
+
+<script type="application/json" id="quizData" set:html={JSON.stringify(quizClient)}></script>
+<script type="application/json" id="boardData" set:html={JSON.stringify(boardClient)}></script>
+
+<script>
+  import '../scripts/character.js';
+  import '../scripts/board.js';
+  import '../scripts/quiz.js';
+</script>

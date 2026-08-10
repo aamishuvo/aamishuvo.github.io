@@ -1,0 +1,90 @@
+{
+  "ui": {
+    "eyebrow": { "en": "Strategic diagnostic", "bn": "স্ট্র্যাটেজিক ডায়াগনস্টিক" },
+    "head": { "en": "Is your programme actually on track?", "bn": "আপনার প্রোগ্রাম কি সত্যিই ঠিক পথে আছে?" },
+    "intro": {
+      "en": "Three questions. Ninety seconds. A verdict you may not enjoy — but will recognise.",
+      "bn": "তিনটি প্রশ্ন। নব্বই সেকেন্ড। এমন এক রায় যা হয়তো ভালো লাগবে না — কিন্তু চিনতে পারবেন।"
+    },
+    "start": { "en": "Start the diagnostic", "bn": "ডায়াগনস্টিক শুরু করুন" },
+    "voiceLabel": { "en": "Voice", "bn": "ভয়েস" },
+    "next": { "en": "Next", "bn": "পরবর্তী" },
+    "seeVerdict": { "en": "See the verdict", "bn": "রায় দেখুন" },
+    "yourName": { "en": "Your name", "bn": "আপনার নাম" },
+    "yourEmail": { "en": "Your email", "bn": "আপনার ইমেইল" },
+    "namePlaceholder": { "en": "So the verdict can address you properly", "bn": "যাতে রায়টা আপনাকে নাম ধরে ডাকতে পারে" },
+    "emailPlaceholder": { "en": "Where the full read-out goes", "bn": "পূর্ণ ফলাফল যেখানে যাবে" },
+    "scoreLabel": { "en": "Delivery confidence score", "bn": "ডেলিভারি কনফিডেন্স স্কোর" },
+    "sendLead": { "en": "Email me the full read-out", "bn": "পূর্ণ ফলাফল ইমেইলে পাঠান" },
+    "retake": { "en": "Retake", "bn": "আবার করুন" },
+    "leadSent": { "en": "Opening your email client…", "bn": "আপনার ইমেইল ক্লায়েন্ট খুলছে…" },
+    "questionOf": { "en": "Question {n} of {total}", "bn": "প্রশ্ন {n} / {total}" }
+  },
+  "questions": [
+    {
+      "id": "date",
+      "q": {
+        "en": "Your go-live date slips by three weeks. Who finds out, and when?",
+        "bn": "আপনার গো-লাইভ তিন সপ্তাহ পিছিয়ে গেল। কে জানতে পারে, আর কখন?"
+      },
+      "options": [
+        { "score": 3, "label": { "en": "Everyone, the day we know — with a recovery plan attached", "bn": "সবাই, যেদিন আমরা জানি — সঙ্গে রিকভারি প্ল্যান" } },
+        { "score": 2, "label": { "en": "The steering committee, at the next scheduled meeting", "bn": "স্টিয়ারিং কমিটি, পরবর্তী নির্ধারিত মিটিংয়ে" } },
+        { "score": 1, "label": { "en": "It gets absorbed quietly and the plan is re-baselined", "bn": "চুপচাপ মানিয়ে নেওয়া হয়, প্ল্যান রি-বেসলাইন হয়" } },
+        { "score": 0, "label": { "en": "Slips? Our dashboard is green", "bn": "পিছানো? আমাদের ড্যাশবোর্ড তো সবুজ" } }
+      ]
+    },
+    {
+      "id": "risk",
+      "q": {
+        "en": "Name the single biggest risk on your programme right now. How long did that take you?",
+        "bn": "এই মুহূর্তে আপনার প্রোগ্রামের সবচেয়ে বড় ঝুঁকিটা বলুন তো। বলতে কতক্ষণ লাগল?"
+      },
+      "options": [
+        { "score": 3, "label": { "en": "Instantly — it's top of the RAID log with an owner and a date", "bn": "সঙ্গে সঙ্গে — RAID লগের শীর্ষে, মালিক ও তারিখসহ" } },
+        { "score": 2, "label": { "en": "A few seconds — I know it, though it's not written anywhere", "bn": "কয়েক সেকেন্ড — জানি, তবে কোথাও লেখা নেই" } },
+        { "score": 1, "label": { "en": "I'd need to ask the team", "bn": "টিমকে জিজ্ঞেস করতে হবে" } },
+        { "score": 0, "label": { "en": "We prefer to stay positive", "bn": "আমরা পজিটিভ থাকতেই পছন্দ করি" } }
+      ]
+    },
+    {
+      "id": "decision",
+      "q": {
+        "en": "A decision has been 'with the executives' for three weeks. What's your move?",
+        "bn": "একটা সিদ্ধান্ত তিন সপ্তাহ ধরে 'এক্সিকিউটিভদের কাছে' পড়ে আছে। আপনি কী করবেন?"
+      },
+      "options": [
+        { "score": 3, "label": { "en": "Escalate with a one-pager: the ask, the cost of each week of delay", "bn": "এক পাতার নোটসহ এসকালেট: চাওয়াটা কী, প্রতি সপ্তাহ দেরির খরচ কত" } },
+        { "score": 2, "label": { "en": "Chase it in the next status meeting", "bn": "পরের স্ট্যাটাস মিটিংয়ে তাগাদা দেব" } },
+        { "score": 1, "label": { "en": "Keep working around it and hope", "bn": "পাশ কাটিয়ে কাজ চালিয়ে যাব, আশায় থাকব" } },
+        { "score": 0, "label": { "en": "Three weeks is normal here", "bn": "তিন সপ্তাহ তো এখানে স্বাভাবিক" } }
+      ]
+    }
+  ],
+  "verdicts": [
+    {
+      "min": 8,
+      "title": { "en": "Governed. Genuinely.", "bn": "সত্যিকারের গভর্নড।" },
+      "text": {
+        "en": "{name}, your programme has the reflexes of a delivery organisation: bad news travels fast, risks have owners, and delay has a price tag. What you'd gain from outside help is leverage, not rescue. Worth a conversation.",
+        "bn": "{name}, আপনার প্রোগ্রামে একটা ডেলিভারি সংগঠনের রিফ্লেক্স আছে: খারাপ খবর দ্রুত পৌঁছায়, ঝুঁকির মালিক আছে, দেরির দামও ঠিক করা। বাইরের সাহায্যে আপনি পাবেন লিভারেজ — উদ্ধার নয়। কথা বলার মতো বিষয়।"
+      }
+    },
+    {
+      "min": 5,
+      "title": { "en": "Held together by heroics.", "bn": "টিকে আছে বীরত্বের জোরে।" },
+      "text": {
+        "en": "{name}, the instincts are right but the system isn't carrying them. Knowledge lives in heads, escalation depends on courage, and one resignation could reset the whole programme. This is fixable — it's governance plumbing, and it's exactly the work I do.",
+        "bn": "{name}, প্রবৃত্তি ঠিক আছে, কিন্তু সিস্টেম সেটা বহন করছে না। জ্ঞান আছে মানুষের মাথায়, এসকালেশন নির্ভর করে সাহসের ওপর, আর একজনের পদত্যাগেই পুরো প্রোগ্রাম শূন্যে নামতে পারে। এটা সারানো যায় — এটা গভর্নেন্সের প্লাম্বিং, আর ঠিক এই কাজটাই আমি করি।"
+      }
+    },
+    {
+      "min": 0,
+      "title": { "en": "Green dashboard. Red programme.", "bn": "সবুজ ড্যাশবোর্ড। লাল প্রোগ্রাম।" },
+      "text": {
+        "en": "{name}, somewhere between the team and the steering committee, the truth is being sanded smooth. The date will hold right up until it doesn't. You don't need a better dashboard — you need a governance reset, and you need it before the next gate. Talk to me.",
+        "bn": "{name}, টিম আর স্টিয়ারিং কমিটির মাঝপথে কোথাও সত্যটা ঘষে মসৃণ করা হচ্ছে। তারিখ ঠিক থাকবে — যতক্ষণ না হঠাৎ আর থাকে না। আপনার দরকার আরও ভালো ড্যাশবোর্ড নয় — দরকার একটা গভর্নেন্স রিসেট, এবং সেটা পরের গেটের আগেই। আমার সঙ্গে কথা বলুন।"
+      }
+    }
+  ]
+}

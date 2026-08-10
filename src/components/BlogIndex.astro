@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props { lang: 'en' | 'bn'; t: any; }
+const { lang, t } = Astro.props;
+
+const posts = (await getCollection('blog', (p) => p.data.lang === lang && !p.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
+const dateFmt = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { dateStyle: 'medium' });
+---
+<section class="block shell" style="padding-top: calc(70px + 3rem);">
+  <p class="eyebrow">{t.blogSection.eyebrow}</p>
+  <h1 class="head">{t.blogSection.head}</h1>
+  <div class="posts">
+    {posts.map((post) => (
+      <a class="post-card" href={`${blogHref}${post.id.split('/').pop()?.replace(/\.md$/, '')}/`}>
+        <time datetime={post.data.date.toISOString()}>{dateFmt.format(post.data.date)}</time>
+        <h3>{post.data.title}</h3>
+        <p>{post.data.description}</p>
+        <div class="tags">{post.data.tags.map((tag) => <span>{tag}</span>)}</div>
+      </a>
+    ))}
+  </div>
+</section>

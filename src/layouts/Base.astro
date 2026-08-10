@@ -1,0 +1,80 @@
+---
+import '@fontsource/big-shoulders-display/700';
+import '@fontsource/big-shoulders-display/900';
+import '@fontsource/manrope/400';
+import '@fontsource/manrope/700';
+import '@fontsource/manrope/800';
+import '@fontsource/space-mono/400';
+import '../styles/global.css';
+import settings from '../data/settings.json';
+
+interface Props {
+  lang: 'en' | 'bn';
+  title: string;
+  description: string;
+  t: any; // language data blob (en.json / bn.json)
+  path?: string;
+}
+
+const { lang, title, description, t, path = '/' } = Astro.props;
+const homeHref = lang === 'bn' ? '/bn/' : '/';
+const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="generator" content={Astro.generator} />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content="/assets/img/portrait.webp" />
+  <meta property="og:type" content="profile" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <script is:inline>
+    // Apply saved Zero Bullshit mode before first paint to avoid a theme flash.
+    if (localStorage.getItem('zb') === '1') document.documentElement.dataset.zb = '';
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">{lang === 'bn' ? 'মূল বিষয়ে যান' : 'Skip to content'}</a>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="shell">
+      <a class="mark" href={homeHref} aria-label="Home">MI<span>·</span></a>
+      <nav aria-label="Primary">
+        <a href={homeHref + '#work'}>{t.nav.work}</a>
+        <a href={homeHref + '#board'}>{t.nav.board}</a>
+        <a href={homeHref + '#diagnostic'}>{t.nav.diagnostic}</a>
+        <a href={blogHref}>{t.nav.blog}</a>
+        <a href={homeHref + '#contact'}>{t.nav.contact}</a>
+      </nav>
+      <button class="zb-toggle" id="zbToggle" aria-pressed="false"
+        data-hint-on={t.zb.hintOn} data-hint-off={t.zb.hintOff}>
+        <span class="zb-word">{t.zb.label}</span><i></i>
+      </button>
+      <a class="lang-switch" href={t.langSwitch.href}>{t.langSwitch.label}</a>
+    </div>
+  </header>
+  <div class="zb-hint" id="zbHint" role="status"></div>
+
+  <main id="main">
+    <slot />
+  </main>
+
+  <footer class="site">
+    <div class="shell">
+      <span>{t.footer.left}</span>
+      <span>{t.footer.right}</span>
+    </div>
+  </footer>
+
+  <script>
+    import '../scripts/main.js';
+    import '../scripts/zb.js';
+  </script>
+</body>
+</html>

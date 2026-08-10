@@ -11,7 +11,7 @@
     "contact": "Contact"
   },
   "zb": {
-    "label": "Corporate mode",
+    "label": "Chill mode",
     "hintOn": "Music on. Gloves off.",
     "hintOff": "Back to polite."
   },
@@ -34,8 +34,8 @@
       "zb": "Committees talk. I ship. Ten years of go-lives that actually went live."
     },
     "status": {
-      "normal": "Open to conversations",
-      "zb": "Open to real work only"
+      "normal": "Open to real work only",
+      "zb": "Open to conversations"
     },
     "scroll": "SCROLL"
   },

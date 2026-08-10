@@ -56,14 +56,14 @@
       "label": "Years delivering"
     },
     {
-      "to": 64,
+      "to": 5,
       "suffix": "",
-      "label": "Districts reached at D2D launch"
+      "label": "Renowned Organizations"
     },
     {
-      "to": 500,
+      "to": 20,
       "suffix": "+",
-      "label": "Thanas covered nationwide"
+      "label": "Impactful Projects"
     },
     {
       "to": 3,
@@ -192,16 +192,12 @@
     "links": [
       {
         "label": "LinkedIn",
-        "key": "linkedin"
-      },
-      {
-        "label": "GitHub",
-        "key": "github"
+        "key": "https://www.linkedin.com/in/iamshuvo/"
       }
     ]
   },
   "footer": {
-    "left": "Md. Mahmudul Islam — Dhaka",
-    "right": "Vanilla JS · Astro · GitHub Pages. No frameworks were harmed."
+    "left": "Md. Mahmudul Islam ",
+    "right": "© 2026, All Rights Reserved"
   }
 }

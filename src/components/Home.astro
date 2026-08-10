@@ -84,7 +84,14 @@ const boardClient = {
         <div class="track-row reveal">
           <div class="track-who">
             <span class="track-period">{r.period}</span>
-            <b class="track-org">{r.org}</b>
+            <div class="track-org-row">
+              <span class="org-logo sm" aria-hidden="true">
+                {r.logo
+                  ? <img src={r.logo} alt="" loading="lazy" />
+                  : <span class="org-logo-fallback">{String(r.org || '?').trim().charAt(0)}</span>}
+              </span>
+              <b class="track-org">{r.org}</b>
+            </div>
             <span class="track-role">{r.role}</span>
           </div>
           <p class="track-focus">{r.focus}</p>
@@ -148,13 +155,16 @@ const boardClient = {
     <p class="eyebrow">{t.education.eyebrow}</p>
     <h2 class="head">{t.education.head}</h2>
     <div class="edu-list">
-      {t.education.items.map((e: any, i: number) => (
+      {t.education.items.map((e: any) => (
         <article class="edu-item reveal">
-          <span class="edu-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="org-logo" aria-hidden="true">
+            {e.logo
+              ? <img src={e.logo} alt="" loading="lazy" />
+              : <span class="org-logo-fallback">{String(e.org || '?').trim().charAt(0)}</span>}
+          </span>
           <div class="edu-main">
             <h3>{e.credential}</h3>
             <p class="edu-org">{e.org}{e.period ? ` · ${e.period}` : ''}</p>
-            {e.note && <p class="edu-note">{e.note}</p>}
           </div>
         </article>
       ))}

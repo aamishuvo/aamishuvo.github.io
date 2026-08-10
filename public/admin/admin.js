@@ -169,6 +169,58 @@
     const wrap = document.createElement('label');
     wrap.append(label(key));
     let input;
+    // image fields get an upload button and a live thumbnail
+    if (typeof value === 'string' && /^(logo|cover|photo|image|icon)$|Photo$|Image$|Logo$/i.test(String(key))) {
+      const row = document.createElement('div');
+      row.className = 'img-field';
+
+      const thumb = document.createElement('span');
+      thumb.className = 'img-thumb';
+
+      input = document.createElement('input');
+      input.value = value;
+      input.placeholder = '/assets/img/logo.png';
+
+      const drawThumb = () => {
+        thumb.innerHTML = '';
+        if (!input.value.trim()) { thumb.textContent = '—'; return; }
+        const img = document.createElement('img');
+        img.src = input.value.trim();
+        img.alt = '';
+        thumb.append(img);
+      };
+      input.addEventListener('input', () => { obj[key] = input.value; drawThumb(); });
+
+      const pick = document.createElement('button');
+      pick.type = 'button';
+      pick.className = 'ghost';
+      pick.textContent = 'Upload…';
+      pick.addEventListener('click', () => {
+        const fp = document.createElement('input');
+        fp.type = 'file';
+        fp.accept = 'image/*';
+        fp.onchange = async () => {
+          if (!fp.files[0]) return;
+          const url = await busy('Uploading image', () => uploadImage(fp.files[0]));
+          input.value = url;
+          obj[key] = url;
+          drawThumb();
+        };
+        fp.click();
+      });
+
+      const clear = document.createElement('button');
+      clear.type = 'button';
+      clear.className = 'ghost';
+      clear.textContent = 'Clear';
+      clear.addEventListener('click', () => { input.value = ''; obj[key] = ''; drawThumb(); });
+
+      drawThumb();
+      row.append(thumb, input, pick, clear);
+      wrap.append(row);
+      return wrap;
+    }
+
     if (key === 'availability' && typeof value === 'string') {
       // one-click status switch; the site colors the hero pill to match
       input = document.createElement('select');

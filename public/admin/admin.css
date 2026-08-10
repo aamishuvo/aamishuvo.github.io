@@ -114,6 +114,18 @@ fieldset > legend {
 .arr-item .rm { margin-left: auto; color: var(--muted); font-size: .75rem; }
 .arr-item .rm:hover { color: #ff7b6b; }
 
+/* image field with upload */
+.img-field { display: flex; align-items: center; gap: .5rem; margin-top: .3rem; }
+.img-field input { flex: 1; }
+.img-field .ghost { white-space: nowrap; padding: .45em .8em; font-size: .8rem; }
+.img-thumb {
+  display: grid; place-items: center; flex: none;
+  width: 42px; height: 42px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg);
+  color: var(--muted); font-size: .8rem; overflow: hidden;
+}
+.img-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+
 /* blog editor */
 .cover-row { display: flex; gap: .6rem; align-items: center; }
 .cover-row input { flex: 1; }

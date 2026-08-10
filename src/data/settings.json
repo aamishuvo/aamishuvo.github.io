@@ -3,6 +3,7 @@
   "contactEmail": "aamishuvo@gmail.com",
   "leadEndpoint": "",
   "aboutPhoto": "/assets/img/portrait.webp",
+  "avatarModel": "",
   "sections": {
     "showTrack": true,
     "showMetrics": true,

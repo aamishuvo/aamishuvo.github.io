@@ -15,6 +15,7 @@
   };
   const BLOG_DIRS = { en: 'src/content/blog/en', bn: 'src/content/blog/bn' };
   const IMG_DIR = 'public/assets/img';
+  const MODEL_DIR = 'public/assets/models';
 
   const $ = (sel, el = document) => el.querySelector(sel);
   const state = {
@@ -169,8 +170,9 @@
     const wrap = document.createElement('label');
     wrap.append(label(key));
     let input;
-    // image fields get an upload button and a live thumbnail
-    if (typeof value === 'string' && /^(logo|cover|photo|image|icon)$|Photo$|Image$|Logo$/i.test(String(key))) {
+    // image/model fields get an upload button and a live thumbnail
+    if (typeof value === 'string' && /^(logo|cover|photo|image|icon|avatarModel)$|Photo$|Image$|Logo$|Model$/i.test(String(key))) {
+      const isModelField = /model/i.test(String(key));
       const row = document.createElement('div');
       row.className = 'img-field';
 
@@ -179,11 +181,12 @@
 
       input = document.createElement('input');
       input.value = value;
-      input.placeholder = '/assets/img/logo.png';
+      input.placeholder = isModelField ? '/assets/models/avatar.glb' : '/assets/img/logo.png';
 
       const drawThumb = () => {
         thumb.innerHTML = '';
         if (!input.value.trim()) { thumb.textContent = '—'; return; }
+        if (isModelField) { thumb.textContent = '3D'; return; }
         const img = document.createElement('img');
         img.src = input.value.trim();
         img.alt = '';
@@ -198,10 +201,10 @@
       pick.addEventListener('click', () => {
         const fp = document.createElement('input');
         fp.type = 'file';
-        fp.accept = 'image/*';
+        fp.accept = isModelField ? '.glb,.gltf,model/gltf-binary' : 'image/*';
         fp.onchange = async () => {
           if (!fp.files[0]) return;
-          const url = await busy('Uploading image', () => uploadImage(fp.files[0]));
+          const url = await busy(isModelField ? 'Uploading 3D model' : 'Uploading image', () => uploadImage(fp.files[0]));
           input.value = url;
           obj[key] = url;
           drawThumb();
@@ -448,20 +451,22 @@
     return lines.join('\n');
   }
 
-  /* Upload a File to public/assets/img and return its site path. */
+  /* Upload a File to public/assets (img or models) and return its site path. */
   async function uploadImage(fileObj) {
     const buf = new Uint8Array(await fileObj.arrayBuffer());
     let bin = '';
     for (let i = 0; i < buf.length; i += 0x8000)
       bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
     const name = fileObj.name.toLowerCase().replace(/[^a-z0-9.-]+/g, '-');
-    const path = `${IMG_DIR}/${name}`;
+    const isModel = /\.(glb|gltf)$/.test(name);
+    const dir = isModel ? MODEL_DIR : IMG_DIR;
+    const path = `${dir}/${name}`;
     let sha;
     try { sha = (await gh(`${contentsUrl(path)}?ref=${encodeURIComponent(state.branch)}`)).sha; } catch { /* new file */ }
-    const body = { message: `admin: upload image ${name}`, content: btoa(bin), branch: state.branch };
+    const body = { message: `admin: upload ${isModel ? 'model' : 'image'} ${name}`, content: btoa(bin), branch: state.branch };
     if (sha) body.sha = sha;
     await gh(contentsUrl(path), { method: 'PUT', body: JSON.stringify(body) });
-    return `/assets/img/${name}`;
+    return `/assets/${isModel ? 'models' : 'img'}/${name}`;
   }
 
   /* Minimal Markdown → HTML, for the editor preview only. */

@@ -38,6 +38,11 @@ const boardClient = {
   <canvas id="field" class="hero-field" aria-hidden="true"></canvas>
   <div class="shell hero-grid">
     <div>
+      {t.hero.availability && (
+        <div class={`avail ${(settings as any).availability || 'employed'}`} role="status">
+          <i></i><span>{t.hero.availability[(settings as any).availability || 'employed']}</span>
+        </div>
+      )}
       <p class="eyebrow">{t.hero.eyebrow}</p>
       <h1 class="bigname" aria-label={t.hero.nameLines.join(' ')}>
         {t.hero.nameLines.map((line: string) => <span>{line}</span>)}
@@ -57,6 +62,31 @@ const boardClient = {
   </div>
   <span class="cue" aria-hidden="true">{t.hero.scroll}</span>
 </section>
+
+<!-- ══════════════ TRACK RECORD ══════════════ -->
+{t.track && (
+  <section class="block shell track" id="track">
+    <p class="eyebrow">{t.track.eyebrow}</p>
+    <div class="track-cols" aria-hidden="true">
+      <span>{t.track.colPeriod}</span>
+      <span>{t.track.colFocus}</span>
+      <span class="track-col-right">{t.track.colImpact}</span>
+    </div>
+    <div class="track-rows">
+      {t.track.rows.map((r: any) => (
+        <div class="track-row reveal">
+          <div class="track-who">
+            <span class="track-period">{r.period}</span>
+            <b class="track-org">{r.org}</b>
+            <span class="track-role">{r.role}</span>
+          </div>
+          <p class="track-focus">{r.focus}</p>
+          <div class="track-impact"><span>{r.impact}</span></div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
 
 <!-- ══════════════ MARQUEE ══════════════ -->
 <div class="marquee" aria-hidden="true">
@@ -172,7 +202,7 @@ const boardClient = {
   <a class="mailto" href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>
   <div class="contact-links">
     {t.contact.links.map((l: any) => (
-      <a href={(settings as any)[l.key]} target="_blank" rel="noopener">{l.label}</a>
+      <a href={String(l.key).startsWith('http') ? l.key : (settings as any)[l.key]} target="_blank" rel="noopener">{l.label}</a>
     ))}
     {settings.cvUrl && <a href={settings.cvUrl}>CV</a>}
   </div>

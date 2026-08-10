@@ -37,7 +37,41 @@
       "normal": "Open to real work only",
       "zb": "Open to conversations"
     },
-    "scroll": "SCROLL"
+    "scroll": "SCROLL",
+    "availability": {
+      "employed": "Full Time Employee @ Banglalink",
+      "available": "Open to work",
+      "break": "On a break from corporate life"
+    }
+  },
+  "track": {
+    "eyebrow": "Executive track record",
+    "colPeriod": "Period / Organization",
+    "colFocus": "Strategic focus",
+    "colImpact": "Real impact",
+    "rows": [
+      {
+        "period": "2019 — pres.",
+        "org": "Banglalink (VEON)",
+        "role": "Program Management Manager",
+        "focus": "Delivery governance for nationwide digital platforms. I run the machinery between product, IT, commercial and field operations — gate criteria agreed before the gate, UAT discipline, and ExCo reporting that leads with the decision needed.",
+        "impact": "D2D nationwide launch"
+      },
+      {
+        "period": "2016 — 2019",
+        "org": "Paperfly",
+        "role": "Project Management",
+        "focus": "Scaling e-commerce logistics delivery across the country — building the operational processes that let a parcel reach any thana, and the reporting that told the truth about where it didn't.",
+        "impact": "Nationwide logistics coverage"
+      },
+      {
+        "period": "2014 — 2016",
+        "org": "Synesis IT",
+        "role": "Project Delivery",
+        "focus": "E-governance platforms under the Digital Bangladesh programme — including delivery work on EkPay, the centralized citizen-to-government payment platform connecting banks, agents and service providers.",
+        "impact": "EkPay P2G platform"
+      }
+    ]
   },
   "marquee": [
     "PMO Governance",

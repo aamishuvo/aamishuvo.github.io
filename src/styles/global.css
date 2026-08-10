@@ -217,6 +217,84 @@ html[lang="bn"] .bigname span { font-family: var(--body); font-weight: 800; lett
 }
 @keyframes bob { 50% { transform: translate(-50%, 8px); } }
 
+/* ── availability pill ────────────────────────── */
+.avail {
+  display: inline-flex; align-items: center; gap: .55em;
+  font-family: var(--mono); font-size: .7rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  padding: .55em 1.2em; border-radius: 99px;
+  margin-bottom: 1.2rem;
+  position: relative; z-index: 2;
+  color: var(--avail-ink);
+  background: var(--avail-bg);
+  border: 1px solid color-mix(in srgb, var(--avail-ink) 30%, transparent);
+  animation: avail-breathe 2.6s ease-in-out infinite;
+}
+.avail.employed { --avail-ink: #d1373c; --avail-bg: rgba(229, 72, 77, .1); }
+.avail.available { --avail-ink: #2f9e44; --avail-bg: rgba(55, 178, 77, .1); }
+.avail.break { --avail-ink: #cf7a00; --avail-bg: rgba(245, 166, 35, .12); }
+[data-zb] .avail.employed { --avail-ink: #ff6b6f; --avail-bg: rgba(229, 72, 77, .16); }
+[data-zb] .avail.available { --avail-ink: #58d76e; --avail-bg: rgba(55, 178, 77, .16); }
+[data-zb] .avail.break { --avail-ink: #ffb84d; --avail-bg: rgba(245, 166, 35, .16); }
+.avail i {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--avail-ink); position: relative; flex: none;
+}
+.avail i::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: var(--avail-ink);
+  animation: avail-ping 1.8s cubic-bezier(0, 0, .2, 1) infinite;
+}
+@keyframes avail-ping {
+  0% { transform: scale(1); opacity: .7; }
+  75%, 100% { transform: scale(2.8); opacity: 0; }
+}
+@keyframes avail-breathe {
+  50% { box-shadow: 0 0 18px color-mix(in srgb, var(--avail-ink) 35%, transparent); }
+}
+
+/* ── executive track record ───────────────────── */
+.track-cols {
+  display: grid; grid-template-columns: 1.1fr 1.7fr .8fr; gap: 1.4rem;
+  font-family: var(--mono); font-size: .66rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--muted);
+  padding-block: .9rem; border-bottom: 1px solid var(--line);
+}
+.track-col-right { text-align: right; }
+.track-row {
+  display: grid; grid-template-columns: 1.1fr 1.7fr .8fr; gap: 1.4rem;
+  align-items: start;
+  padding: 2.2rem 1rem;
+  margin-inline: -1rem;
+  border-bottom: 1px solid var(--line);
+  transition: background .3s ease;
+}
+.track-row:nth-child(even) { background: color-mix(in srgb, var(--bg-raised) 60%, transparent); }
+.track-row:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.track-period {
+  font-family: var(--mono); font-size: .72rem; color: var(--muted);
+  border-left: 3px solid var(--accent); padding-left: .7em;
+}
+.track-org {
+  display: block; font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  font-weight: 800; margin-block: .45em .3em; line-height: 1.15;
+}
+.track-role {
+  font-family: var(--mono); font-size: .64rem;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.track-focus { color: var(--ink-soft); font-size: .95rem; max-width: 60ch; }
+.track-impact { justify-self: end; text-align: right; }
+.track-impact span {
+  display: inline-block;
+  font-family: var(--mono); font-size: .64rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  background: var(--bg-raised); border: 1px solid var(--line);
+  border-radius: 8px; padding: .6em 1em;
+  transition: border-color .25s, color .25s;
+}
+.track-row:hover .track-impact span { border-color: var(--accent); color: var(--accent); }
+
 /* ── marquee ──────────────────────────────────── */
 .marquee {
   overflow: hidden; border-block: 1px solid var(--line);
@@ -528,6 +606,9 @@ body::after {
 /* ── responsive ───────────────────────────────── */
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; }
+  .track-cols { display: none; }
+  .track-row { grid-template-columns: 1fr; gap: .9rem; padding: 1.6rem .8rem; margin-inline: -.8rem; }
+  .track-impact { justify-self: start; text-align: left; }
   .stage { aspect-ratio: 4 / 3; max-height: 46svh; order: -1; margin-top: .5rem; }
   .metrics { grid-template-columns: repeat(2, 1fr); gap: 1.6rem 1rem; }
   .cells { grid-template-columns: 1fr; }

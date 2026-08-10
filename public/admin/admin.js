@@ -169,6 +169,23 @@
     const wrap = document.createElement('label');
     wrap.append(label(key));
     let input;
+    if (key === 'availability' && typeof value === 'string') {
+      // one-click status switch; the site colors the hero pill to match
+      input = document.createElement('select');
+      for (const [val, text] of [
+        ['employed', '🔴 Employed — not available (red)'],
+        ['available', '🟢 Open to work (green)'],
+        ['break', '🟡 On a break from corporate life (amber)']
+      ]) {
+        const o = document.createElement('option');
+        o.value = val; o.textContent = text;
+        input.append(o);
+      }
+      input.value = value;
+      input.addEventListener('change', () => { obj[key] = input.value; });
+      wrap.append(input);
+      return wrap;
+    }
     if (typeof value === 'boolean') {
       input = document.createElement('input');
       input.type = 'checkbox';

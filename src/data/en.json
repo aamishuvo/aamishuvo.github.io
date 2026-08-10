@@ -28,7 +28,7 @@
     "role": "Program Management Manager",
     "company": "Banglalink Digital Communications (VEON Ltd.}",
     "location": "Dhaka, Bangladesh",
-    "experience": "10+ years | telecom · logistics · e-governance",
+    "experience": "10+ years in telecom, logistics & e-governance",
     "tagline": {
       "normal": "I turn ambiguous projects into dated, measurable go-lives.",
       "zb": "Committees talk. I ship. Ten years of go-lives that actually went live."
@@ -41,11 +41,10 @@
   },
   "marquee": [
     "PMO Governance",
-    "eTOM Process Design",
-    "Programme Delivery",
+    "eTOM Framework",
+    "Project Delivery",
     "ExCo Reporting",
-    "Business Process Re-engineering",
-    "UAT to Go-Live",
+    "Artificial Intelligence",
     "Vendor Governance",
     "Digital Platform Launch"
   ],
@@ -72,40 +71,40 @@
     }
   ],
   "work": {
-    "eyebrow": "Selected programmes",
-    "head": "What shipped",
+    "eyebrow": "Selected Projects",
+    "head": "What I shipped",
     "programmes": [
       {
-        "name": "D2D — nationwide door-to-door digital services",
+        "name": "Nationwide door-to-door fulfilment for Banglalink",
         "chip": "Live · Jul 2026",
         "live": true,
         "body": {
-          "normal": "One platform consolidating SIM services, FWA, MNP, transfer of ownership and device ordering — with automated rider assignment behind it. I ran delivery governance across product, IT, commercial and field operations, from UAT sign-off through to launch.",
-          "zb": "Five separate services crammed into one platform, launched nationwide without slipping the date. Product, IT, commercial and field ops all pulling in different directions — my job was making them pull in one."
+          "normal": "One platform consolidating SIM services, FWA, MNP, transfer of ownership and device ordering with automated rider assignment behind it. I ran delivery governance across product, IT, commercial and field operations, from UAT sign-off through to launch.",
+          "zb": "Five separate services crammed into one platform, launched nationwide without slipping the date. Product, IT, commercial and field ops all pulling in different directions; my job was making them pull in one."
         },
         "pills": [
           "Cross-functional governance",
-          "UAT sign-off",
+          "System Design",
           "Launch readiness",
           "Field ops integration"
         ],
         "result": "Same-day fulfilment for orders placed before noon, across all 64 districts."
       },
       {
-        "name": "Approval throughput — rebuilding the decision pipeline",
-        "chip": "Governance · 2025–26",
-        "live": false,
+        "name": "EkPay | Bangladesh's centralized P2G bill payment platform or A2i",
+        "chip": "Live · Nov 2019",
+        "live": true,
         "body": {
-          "normal": "Analysed two years of corporate document-approval records, then reframed the question: rank bottlenecks by delay-days held, not by ticket volume. That inverted which approval stages actually mattered — and the PMO recommendations followed the delay rather than the noise.",
-          "zb": "Everyone blamed the noisy stages. The data said the quiet ones were holding the delay. I ranked bottlenecks by days-held instead of ticket count and the real problem fell out immediately."
+          "normal": "EkPay is Bangladesh's largest payment aggregator — the A2i initiative to give citizens a single centralized People-to-Government payment platform under the Digital Bangladesh vision. I worked on delivery of a platform connecting 15+ banks, 30+ service providers, 50+ assisted agents and 50,000+ syndicated agents, letting citizens pay any bill from cards, bank accounts or digital credit in one place.",
+          "zb": "Before EkPay: a citizen queued at one office to pay one bill, then queued at another. After: one platform, 15+ banks, 30+ service providers, 50,000+ agents — every government bill payable from a phone. That's what 'Digital Bangladesh' looks like when it ships instead of staying a slogan."
         },
         "pills": [
-          "Data analysis",
-          "Bottleneck modelling",
-          "PMO recommendations",
-          "CEO reporting"
+          "Payment aggregation",
+          "P2G platform",
+          "Bank integration",
+          "Agent network rollout"
         ],
-        "result": "Turnaround time down 42% year over year."
+        "result": "One centralized platform for citizen-to-government payments, spanning 15+ banks and 50,000+ agents nationwide."
       },
       {
         "name": "MVNO partnership — scope, journeys and regulatory path",

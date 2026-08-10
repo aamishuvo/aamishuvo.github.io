@@ -11,14 +11,20 @@
     "contact": "Contact"
   },
   "zb": {
-    "label": "Zero Bullshit",
+    "label": "Corporate mode",
     "hintOn": "Music on. Gloves off.",
     "hintOff": "Back to polite."
   },
-  "langSwitch": { "label": "বাংলা", "href": "/bn/" },
+  "langSwitch": {
+    "label": "বাংলা",
+    "href": "/bn/"
+  },
   "hero": {
     "eyebrow": "Program delivery · Dhaka",
-    "nameLines": ["MAHMUDUL", "ISLAM"],
+    "nameLines": [
+      "MAHMUDUL",
+      "ISLAM"
+    ],
     "role": "Program Management Manager",
     "company": "Banglalink Digital Communications — VEON Group",
     "location": "Dhaka, Bangladesh",
@@ -44,10 +50,26 @@
     "Digital Platform Launch"
   ],
   "metrics": [
-    { "to": 10, "suffix": "+", "label": "Years delivering" },
-    { "to": 64, "suffix": "", "label": "Districts reached at D2D launch" },
-    { "to": 500, "suffix": "+", "label": "Thanas covered nationwide" },
-    { "to": 3, "suffix": "", "label": "Sectors — telecom, logistics, e-gov" }
+    {
+      "to": 10,
+      "suffix": "+",
+      "label": "Years delivering"
+    },
+    {
+      "to": 64,
+      "suffix": "",
+      "label": "Districts reached at D2D launch"
+    },
+    {
+      "to": 500,
+      "suffix": "+",
+      "label": "Thanas covered nationwide"
+    },
+    {
+      "to": 3,
+      "suffix": "",
+      "label": "Sectors — telecom, logistics, e-gov"
+    }
   ],
   "work": {
     "eyebrow": "Selected programmes",
@@ -61,7 +83,12 @@
           "normal": "One platform consolidating SIM services, FWA, MNP, transfer of ownership and device ordering — with automated rider assignment behind it. I ran delivery governance across product, IT, commercial and field operations, from UAT sign-off through to launch.",
           "zb": "Five separate services crammed into one platform, launched nationwide without slipping the date. Product, IT, commercial and field ops all pulling in different directions — my job was making them pull in one."
         },
-        "pills": ["Cross-functional governance", "UAT sign-off", "Launch readiness", "Field ops integration"],
+        "pills": [
+          "Cross-functional governance",
+          "UAT sign-off",
+          "Launch readiness",
+          "Field ops integration"
+        ],
         "result": "Same-day fulfilment for orders placed before noon, across all 64 districts."
       },
       {
@@ -72,7 +99,12 @@
           "normal": "Analysed two years of corporate document-approval records, then reframed the question: rank bottlenecks by delay-days held, not by ticket volume. That inverted which approval stages actually mattered — and the PMO recommendations followed the delay rather than the noise.",
           "zb": "Everyone blamed the noisy stages. The data said the quiet ones were holding the delay. I ranked bottlenecks by days-held instead of ticket count and the real problem fell out immediately."
         },
-        "pills": ["Data analysis", "Bottleneck modelling", "PMO recommendations", "CEO reporting"],
+        "pills": [
+          "Data analysis",
+          "Bottleneck modelling",
+          "PMO recommendations",
+          "CEO reporting"
+        ],
         "result": "Turnaround time down 42% year over year."
       },
       {
@@ -83,7 +115,12 @@
           "normal": "Built the business scope for a state-operator MVNO partnership: cross-operator after-sales routing, the number-portability journey, and a customer onboarding flow with regulatory validation designed in from the start rather than bolted on afterwards.",
           "zb": "Regulatory sign-off is where partnerships go to die, so I designed it into the onboarding flow on day one instead of praying for it at the end."
         },
-        "pills": ["Business scoping", "Journey design", "Regulatory alignment", "Partner governance"],
+        "pills": [
+          "Business scoping",
+          "Journey design",
+          "Regulatory alignment",
+          "Partner governance"
+        ],
         "result": "Regulatory checkpoints embedded directly in the onboarding flow."
       }
     ]
@@ -120,10 +157,22 @@
       }
     ],
     "facts": [
-      { "dt": "Currently", "dd": "Program Management Manager, Banglalink Digital Communications Ltd. (VEON Group)" },
-      { "dt": "Previously", "dd": "Paperfly · Synesis IT" },
-      { "dt": "Education", "dd": "B.Sc. in Electrical & Electronic Engineering — Stamford University Bangladesh" },
-      { "dt": "Based", "dd": "Dhaka, Bangladesh" }
+      {
+        "dt": "Currently",
+        "dd": "Program Management Manager, Banglalink Digital Communications Ltd. (VEON Group)"
+      },
+      {
+        "dt": "Previously",
+        "dd": "Paperfly · Synesis IT"
+      },
+      {
+        "dt": "Education",
+        "dd": "B.Sc. in Electrical & Electronic Engineering — Stamford University Bangladesh"
+      },
+      {
+        "dt": "Based",
+        "dd": "Dhaka, Bangladesh"
+      }
     ]
   },
   "blogSection": {
@@ -141,8 +190,14 @@
       "zb": "Bring me something stuck. I like stuck."
     },
     "links": [
-      { "label": "LinkedIn", "key": "linkedin" },
-      { "label": "GitHub", "key": "github" }
+      {
+        "label": "LinkedIn",
+        "key": "linkedin"
+      },
+      {
+        "label": "GitHub",
+        "key": "github"
+      }
     ]
   },
   "footer": {

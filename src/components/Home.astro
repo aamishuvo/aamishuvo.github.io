@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import settings from '../data/settings.json';
 import postits from '../data/postits.json';
 import quiz from '../data/quiz.json';
+import Social from './Social.astro';
 
 interface Props { lang: 'en' | 'bn'; t: any; }
 const { lang, t } = Astro.props;
@@ -13,6 +14,12 @@ const posts = (await getCollection('blog', (p) => p.data.lang === lang && !p.dat
 
 const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
 const dateFmt = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { dateStyle: 'medium' });
+
+// Section visibility is admin-controlled (Settings → Sections).
+const S = Object.assign({
+  showTrack: true, showMetrics: true, showProjects: true, showEducation: true,
+  showBoard: false, showDiagnostic: true, showMethod: false, showBlogOnHome: false
+}, (settings as any).sections || {});
 
 // Per-language slices of the shared quiz/board config, serialized for the client scripts.
 const quizClient = {
@@ -43,7 +50,7 @@ const boardClient = {
           <i></i><span>{t.hero.availability[(settings as any).availability || 'employed']}</span>
         </div>
       )}
-      <p class="eyebrow">{t.hero.eyebrow}</p>
+      {t.hero.eyebrow && <p class="eyebrow">{t.hero.eyebrow}</p>}
       <h1 class="bigname" aria-label={t.hero.nameLines.join(' ')}>
         {t.hero.nameLines.map((line: string) => <span>{line}</span>)}
       </h1>
@@ -64,7 +71,7 @@ const boardClient = {
 </section>
 
 <!-- ══════════════ TRACK RECORD ══════════════ -->
-{t.track && (
+{S.showTrack && t.track && (
   <section class="block shell track" id="track">
     <p class="eyebrow">{t.track.eyebrow}</p>
     <div class="track-cols" aria-hidden="true">
@@ -97,73 +104,97 @@ const boardClient = {
 </div>
 
 <!-- ══════════════ METRICS ══════════════ -->
-<section class="metrics shell" aria-label="Key figures">
-  {t.metrics.map((m: any) => (
-    <div class="metric reveal">
-      <b class="count" data-to={m.to} data-suffix={m.suffix}>0</b>
-      <span>{m.label}</span>
-    </div>
-  ))}
-</section>
-
-<!-- ══════════════ WORK ══════════════ -->
-<section class="block shell" id="work">
-  <p class="eyebrow">{t.work.eyebrow}</p>
-  <h2 class="head">{t.work.head}</h2>
-  <div class="stack">
-    {t.work.programmes.map((p: any, i: number) => (
-      <article class="prog reveal">
-        <button class="prog-bar" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`p${i + 1}`}>
-          <span class="idx">{String(i + 1).padStart(2, '0')}</span>
-          <span class="prog-name">{p.name}</span>
-          <span class={p.live ? 'chip live' : 'chip'}>{p.chip}</span>
-          <span class="caret" aria-hidden="true"></span>
-        </button>
-        <div class="prog-body" id={`p${i + 1}`}>
-          <div class="prog-inner">
-            <p data-zb-alt={p.body.zb}>{p.body.normal}</p>
-            <ul class="pills">{p.pills.map((pill: string) => <li>{pill}</li>)}</ul>
-            <p class="result">{p.result}</p>
-          </div>
-        </div>
-      </article>
-    ))}
-  </div>
-</section>
-
-<!-- ══════════════ BOARD ══════════════ -->
-<section class="block shell" id="board">
-  <p class="eyebrow">{t.board.eyebrow}</p>
-  <h2 class="head">{t.board.head}</h2>
-  <p class="board-hint">{t.board.hint}</p>
-  <div class="board-wrap">
-    <div class="board" id="boardEl">
-      <div class="board-grid" id="boardGrid"></div>
-      <svg class="wires" id="wires"></svg>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ METHOD ══════════════ -->
-<section class="block shell" id="method">
-  <p class="eyebrow">{t.method.eyebrow}</p>
-  <h2 class="head">{t.method.head}</h2>
-  <div class="cells">
-    {t.method.cells.map((c: any) => (
-      <div class="cell reveal">
-        <h3>{c.title}</h3>
-        <p data-zb-alt={c.body.zb}>{c.body.normal}</p>
+{S.showMetrics && (
+  <section class="metrics shell" aria-label="Key figures">
+    {t.metrics.map((m: any) => (
+      <div class="metric reveal">
+        <b class="count" data-to={m.to} data-suffix={m.suffix}>0</b>
+        <span>{m.label}</span>
       </div>
     ))}
-  </div>
-  <dl class="facts reveal">
-    {t.method.facts.map((f: any) => (
-      <div><dt>{f.dt}</dt><dd>{f.dd}</dd></div>
-    ))}
-  </dl>
-</section>
+  </section>
+)}
+
+<!-- ══════════════ WORK ══════════════ -->
+{S.showProjects && (
+  <section class="block shell" id="work">
+    <p class="eyebrow">{t.work.eyebrow}</p>
+    <h2 class="head">{t.work.head}</h2>
+    <div class="stack">
+      {t.work.programmes.map((p: any, i: number) => (
+        <article class="prog reveal">
+          <button class="prog-bar" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`p${i + 1}`}>
+            <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+            <span class="prog-name">{p.name}</span>
+            <span class={p.live ? 'chip live' : 'chip'}>{p.chip}</span>
+            <span class="caret" aria-hidden="true"></span>
+          </button>
+          <div class="prog-body" id={`p${i + 1}`}>
+            <div class="prog-inner">
+              <p data-zb-alt={p.body.zb}>{p.body.normal}</p>
+              <ul class="pills">{p.pills.map((pill: string) => <li>{pill}</li>)}</ul>
+              <p class="result">{p.result}</p>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+)}
+
+<!-- ══════════════ EDUCATION ══════════════ -->
+{S.showEducation && t.education && (
+  <section class="block shell" id="education">
+    <p class="eyebrow">{t.education.eyebrow}</p>
+    <h2 class="head">{t.education.head}</h2>
+    <div class="edu-list">
+      {t.education.items.map((e: any, i: number) => (
+        <article class="edu-item reveal">
+          <span class="edu-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <div class="edu-main">
+            <h3>{e.credential}</h3>
+            <p class="edu-org">{e.org}{e.period ? ` · ${e.period}` : ''}</p>
+            {e.note && <p class="edu-note">{e.note}</p>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+)}
+
+<!-- ══════════════ BOARD ══════════════ -->
+{S.showBoard && (
+  <section class="block shell" id="board">
+    <p class="eyebrow">{t.board.eyebrow}</p>
+    <h2 class="head">{t.board.head}</h2>
+    <p class="board-hint">{t.board.hint}</p>
+    <div class="board-wrap">
+      <div class="board" id="boardEl">
+        <div class="board-grid" id="boardGrid"></div>
+        <svg class="wires" id="wires"></svg>
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- ══════════════ METHOD ══════════════ -->
+{S.showMethod && (
+  <section class="block shell" id="method">
+    <p class="eyebrow">{t.method.eyebrow}</p>
+    <h2 class="head">{t.method.head}</h2>
+    <div class="cells">
+      {t.method.cells.map((c: any) => (
+        <div class="cell reveal">
+          <h3>{c.title}</h3>
+          <p data-zb-alt={c.body.zb}>{c.body.normal}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
 
 <!-- ══════════════ DIAGNOSTIC ══════════════ -->
+{S.showDiagnostic && (
 <section class="block shell" id="diagnostic">
   <div class="diag-shell" id="diag">
     <p class="eyebrow">{quiz.ui.eyebrow[lang]}</p>
@@ -177,35 +208,34 @@ const boardClient = {
     </div>
   </div>
 </section>
+)}
 
 <!-- ══════════════ BLOG ══════════════ -->
-<section class="block shell" id="blog">
-  <p class="eyebrow">{t.blogSection.eyebrow}</p>
-  <h2 class="head">{t.blogSection.head}</h2>
-  <div class="posts">
-    {posts.map((post) => (
-      <a class="post-card reveal" href={`${blogHref}${post.id.split('/').pop()?.replace(/\.md$/, '')}/`}>
-        <time datetime={post.data.date.toISOString()}>{dateFmt.format(post.data.date)}</time>
-        <h3>{post.data.title}</h3>
-        <p>{post.data.description}</p>
-        <div class="tags">{post.data.tags.map((tag) => <span>{tag}</span>)}</div>
-      </a>
-    ))}
-  </div>
-  <a class="all-posts-link" href={blogHref}>{t.blogSection.all} →</a>
-</section>
+{S.showBlogOnHome && (
+  <section class="block shell" id="blog">
+    <p class="eyebrow">{t.blogSection.eyebrow}</p>
+    <h2 class="head">{t.blogSection.head}</h2>
+    <div class="posts">
+      {posts.map((post) => (
+        <a class="post-card reveal" href={`${blogHref}${post.id.split('/').pop()?.replace(/\.md$/, '')}/`}>
+          <time datetime={post.data.date.toISOString()}>{dateFmt.format(post.data.date)}</time>
+          <h3>{post.data.title}</h3>
+          <p>{post.data.description}</p>
+          <div class="tags">{post.data.tags.map((tag) => <span>{tag}</span>)}</div>
+        </a>
+      ))}
+    </div>
+    <a class="all-posts-link" href={blogHref}>{t.blogSection.all} →</a>
+  </section>
+)}
 
 <!-- ══════════════ CONTACT ══════════════ -->
 <section class="block shell" id="contact">
   <p class="eyebrow">{t.contact.eyebrow}</p>
   <p class="contact-head" data-zb-alt={t.contact.head.zb}>{t.contact.head.normal}</p>
   <a class="mailto" href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>
-  <div class="contact-links">
-    {t.contact.links.map((l: any) => (
-      <a href={String(l.key).startsWith('http') ? l.key : (settings as any)[l.key]} target="_blank" rel="noopener">{l.label}</a>
-    ))}
-    {settings.cvUrl && <a href={settings.cvUrl}>CV</a>}
-  </div>
+  <Social size="lg" />
+  {settings.cvUrl && <div class="contact-links"><a href={settings.cvUrl}>CV</a></div>}
 </section>
 
 <script type="application/json" id="quizData" set:html={JSON.stringify(quizClient)}></script>

@@ -5,8 +5,10 @@ import '@fontsource/manrope/400';
 import '@fontsource/manrope/700';
 import '@fontsource/manrope/800';
 import '@fontsource/space-mono/400';
+import '@fontsource/caveat/500';
 import '../styles/global.css';
 import Social from '../components/Social.astro';
+import settings from '../data/settings.json';
 
 interface Props {
   lang: 'en' | 'bn';
@@ -20,13 +22,14 @@ const { lang, title, description, t } = Astro.props;
 const base = lang === 'bn' ? '/bn' : '';
 const homeHref = lang === 'bn' ? '/bn/' : '/';
 
+const s: any = settings;
 const links = [
-  { href: `${homeHref}#work`, label: t.nav.work },
-  { href: `${homeHref}#board`, label: t.nav.board },
-  { href: `${homeHref}#diagnostic`, label: t.nav.diagnostic },
-  { href: `${base}/blog/`, label: t.nav.blog },
+  { href: `${homeHref}#track`, label: t.nav.work },
+  ...(s.navShowBoard ? [{ href: `${homeHref}#board`, label: t.nav.board }] : []),
+  ...(s.navShowDiagnostic ? [{ href: `${homeHref}#diagnostic`, label: t.nav.diagnostic }] : []),
   { href: `${base}/about/`, label: t.nav.about || 'About' },
-  { href: `${base}/contact/`, label: t.nav.contact }
+  { href: `${base}/contact/`, label: t.nav.contact },
+  { href: `${base}/blog/`, label: t.nav.blog }
 ];
 ---
 <!doctype html>
@@ -85,7 +88,6 @@ const links = [
   <footer class="site">
     <div class="shell">
       <span>{t.footer.left}</span>
-      <Social size="sm" showEmail={true} />
       <span>{t.footer.right}</span>
     </div>
   </footer>

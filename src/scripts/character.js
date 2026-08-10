@@ -208,21 +208,59 @@ function init(stage) {
   ground.receiveShadow = true;
   scene.add(ground);
 
-  // ── pointer tracking ──
+  // ── input: cursor on desktop, touch + auto-look on phones ──
+  const coarse = matchMedia('(pointer: coarse)').matches;
   const target = new THREE.Vector2(0, 0);
-  addEventListener('pointermove', (e) => {
-    target.x = (e.clientX / innerWidth) * 2 - 1;
-    target.y = (e.clientY / innerHeight) * 2 - 1;
-  }, { passive: true });
 
-  // ── dance state (driven by Zero Bullshit mode) ──
-  let danceTarget = 'zb' in document.documentElement.dataset ? 1 : 0;
-  let dance = danceTarget;
-  addEventListener('zbchange', (e) => { danceTarget = e.detail.on ? 1 : 0; });
+  if (!coarse) {
+    addEventListener('pointermove', (e) => {
+      target.x = (e.clientX / innerWidth) * 2 - 1;
+      target.y = (e.clientY / innerHeight) * 2 - 1;
+    }, { passive: true });
+  }
 
+  // ── dance state: Zero Bullshit mode, or a tap-triggered burst on touch ──
+  let zbDance = 'zb' in document.documentElement.dataset ? 1 : 0;
+  let burstUntil = 0;
+  let dance = zbDance;
+  addEventListener('zbchange', (e) => { zbDance = e.detail.on ? 1 : 0; });
+
+  const bn = document.documentElement.lang === 'bn';
   const hintEl = document.getElementById('stageHint');
-  if (hintEl) {
-    const bn = document.documentElement.lang === 'bn';
+  let touchDragging = false;
+
+  if (coarse) {
+    // Touch: drag the character to turn him, tap to make him dance.
+    stage.style.touchAction = 'pan-y';
+    stage.style.cursor = 'pointer';
+    let moved = false, startX = 0, startY = 0, baseX = 0, baseY = 0;
+
+    stage.addEventListener('pointerdown', (e) => {
+      touchDragging = true; moved = false;
+      startX = e.clientX; startY = e.clientY;
+      baseX = target.x; baseY = target.y;
+      stage.setPointerCapture(e.pointerId);
+    });
+    stage.addEventListener('pointermove', (e) => {
+      if (!touchDragging) return;
+      const dx = (e.clientX - startX) / stage.clientWidth;
+      const dy = (e.clientY - startY) / stage.clientHeight;
+      if (Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6) moved = true;
+      target.x = THREE.MathUtils.clamp(baseX + dx * 2.4, -1, 1);
+      target.y = THREE.MathUtils.clamp(baseY + dy * 2.4, -1, 1);
+    });
+    const endDrag = () => {
+      if (touchDragging && !moved) {
+        burstUntil = performance.now() + 6000; // tap → short dance
+        if (hintEl) hintEl.textContent = bn ? 'এই তো নাচ!' : 'there you go';
+      }
+      touchDragging = false;
+    };
+    stage.addEventListener('pointerup', endDrag);
+    stage.addEventListener('pointercancel', () => { touchDragging = false; });
+
+    if (hintEl) hintEl.textContent = bn ? 'ট্যাপ করুন — ও নাচবে · টেনে ঘোরান' : 'tap him to dance · drag to turn';
+  } else if (hintEl) {
     hintEl.textContent = bn ? 'কার্সর নাড়ান — ও তাকিয়ে আছে' : 'move your cursor — he’s watching';
   }
 
@@ -258,10 +296,17 @@ function init(stage) {
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
     elapsed += dt;
+    const danceTarget = Math.max(zbDance, performance.now() < burstUntil ? 1 : 0);
     dance += (danceTarget - dance) * Math.min(1, dt * 3);
 
     const t = elapsed;
     const beat = (t * BPM) / 60;
+
+    // On touch devices with no cursor, he glances around on his own.
+    if (coarse && !touchDragging) {
+      target.x += ((Math.sin(t * 0.42) * 0.75) - target.x) * Math.min(1, dt * 0.9);
+      target.y += ((Math.sin(t * 0.31) * 0.35) - target.y) * Math.min(1, dt * 0.9);
+    }
 
     // pointer follow (head + slight body turn), eased
     const hx = THREE.MathUtils.clamp(target.x, -1, 1);

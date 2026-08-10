@@ -211,8 +211,10 @@ html[lang="bn"] .mobile-menu nav a { font-family: var(--body); font-weight: 800;
 }
 .bigname span:last-child { color: var(--accent); }
 .hero .tagline {
-  max-width: 34ch; margin-top: 1.6rem; font-size: 1.05rem;
+  max-width: 62ch; margin-top: 1.6rem;
+  font-size: clamp(.95rem, 1.15vw, 1.15rem);
   color: var(--ink-soft); position: relative; z-index: 2;
+  text-wrap: pretty;
 }
 .hero-meta {
   display: flex; flex-wrap: wrap; gap: .5rem 1.6rem;
@@ -407,6 +409,25 @@ html[lang="bn"] .metric b { font-family: var(--body); font-weight: 800; }
   padding-left: .9rem; max-width: 56ch;
 }
 
+/* ── education ────────────────────────────────── */
+.edu-list { display: grid; gap: 1rem; }
+.edu-item {
+  display: grid; grid-template-columns: auto 1fr; gap: 1.4rem;
+  background: var(--bg-raised); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 1.7rem 1.6rem;
+  transition: border-color .25s, transform .25s;
+}
+.edu-item:hover { border-color: var(--accent); transform: translateY(-3px); }
+.edu-n {
+  font-family: var(--display); font-weight: 900;
+  font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1;
+  color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+html[lang="bn"] .edu-n { font-family: var(--body); font-weight: 800; }
+.edu-main h3 { font-size: clamp(1.05rem, 2.1vw, 1.3rem); line-height: 1.25; margin-bottom: .3rem; }
+.edu-org { font-family: var(--mono); font-size: .74rem; color: var(--muted); margin-bottom: .8rem; }
+.edu-note { font-size: .92rem; color: var(--ink-soft); max-width: 66ch; }
+
 /* ── board (post-its) ─────────────────────────── */
 .board-wrap { position: relative; }
 .board-hint { font-size: .85rem; color: var(--muted); max-width: 52ch; margin-bottom: 1.6rem; }
@@ -570,8 +591,24 @@ html[lang="bn"] .score-num { font-family: var(--body); font-weight: 800; }
 }
 .all-posts-link { margin-top: 1.6rem; display: inline-block; font-weight: 700; color: var(--accent); }
 
+.card-cover {
+  width: calc(100% + 3rem); margin: -1.7rem -1.5rem 1.2rem;
+  max-width: none; height: 180px; object-fit: cover;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.card-subtitle { font-family: "Caveat", var(--body); font-size: 1.15rem; color: var(--muted); margin-bottom: .4rem; }
+html[lang="bn"] .card-subtitle { font-family: var(--body); font-style: italic; font-size: .92rem; }
+
 /* article page */
 .article { max-width: 720px; margin-inline: auto; padding-block: calc(70px + 3rem) 5rem; }
+.article-subtitle {
+  font-family: "Caveat", var(--body); font-size: clamp(1.3rem, 3vw, 1.8rem);
+  color: var(--muted); margin-bottom: 1rem; line-height: 1.25;
+}
+html[lang="bn"] .article-subtitle { font-family: var(--body); font-style: italic; font-size: 1.05rem; }
+.article-cover { margin: 2rem 0 0; }
+.article-cover img { width: 100%; border-radius: var(--radius); }
+.article-body img { border-radius: var(--radius); margin-block: 1.4rem; }
 .article-head h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.12; margin-block: .6rem 1rem; }
 .article-head .meta { font-family: var(--mono); font-size: .72rem; color: var(--muted); display: flex; gap: 1.2rem; flex-wrap: wrap; }
 .article-body { margin-top: 2.4rem; }
@@ -630,13 +667,40 @@ footer.site .shell {
 html[lang="bn"] .page-title { font-family: var(--body); font-weight: 800; line-height: 1.15; }
 .page-lead { font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--ink-soft); max-width: 56ch; margin-bottom: 1.4rem; }
 
-.about-top { display: grid; grid-template-columns: 1.25fr .75fr; gap: 2.5rem; align-items: center; }
-.about-portrait { margin: 0; }
-.about-portrait img {
-  width: 100%; height: clamp(330px, 48vh, 470px);
-  object-fit: cover; object-position: 50% 8%;
-  border-radius: var(--radius);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 16%, transparent), var(--bg-raised));
+/* about hero — name, script role, paragraphs, portrait right */
+.about-hero {
+  display: grid; grid-template-columns: 1.15fr .85fr;
+  gap: clamp(1.5rem, 4vw, 4rem); align-items: center;
+  padding-block: calc(70px + 3.5rem) 2rem;
+}
+.about-hero .rule {
+  display: block; width: 46px; height: 2px;
+  background: var(--muted); opacity: .5; margin-bottom: 1.6rem;
+}
+.about-name {
+  font-size: clamp(2.1rem, 4.6vw, 3.4rem); font-weight: 800;
+  line-height: 1.08; letter-spacing: -.02em; margin-bottom: .3rem;
+}
+.about-role {
+  font-family: "Caveat", var(--body); font-weight: 500;
+  font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+  color: var(--muted); line-height: 1.2; margin-bottom: 1.2rem;
+}
+html[lang="bn"] .about-role { font-family: var(--body); font-style: italic; font-size: clamp(1rem, 1.9vw, 1.3rem); }
+.about-paras { display: grid; gap: .9rem; max-width: 60ch; }
+.about-paras p { color: var(--ink-soft); font-size: clamp(.98rem, 1.25vw, 1.1rem); }
+.read-link {
+  display: block; width: fit-content; margin-top: 1.5rem;
+  font-family: var(--mono); font-size: .8rem;
+  color: var(--muted); text-decoration: none;
+  border-bottom: 1px solid var(--line); padding-bottom: 3px;
+  transition: color .2s, border-color .2s;
+}
+.read-link:hover { color: var(--accent); border-color: var(--accent); }
+.about-hero .avail { display: flex; width: fit-content; margin-top: 1.6rem; margin-bottom: 0; }
+.about-photo { margin: 0; }
+.about-photo img {
+  width: 100%; height: auto; border-radius: var(--radius);
 }
 .about-body { display: grid; gap: 2.4rem; }
 .about-sec h2 { font-size: clamp(1.3rem, 2.6vw, 1.7rem); margin-bottom: .8rem; }
@@ -741,8 +805,8 @@ body::after {
   .nav-links { display: none; }
   .burger { display: flex; }
   .nav .shell { justify-content: space-between; gap: .6rem; }
-  .about-top { grid-template-columns: 1fr; gap: 1.6rem; }
-  .about-portrait { max-width: 320px; }
+  .about-hero { grid-template-columns: 1fr; gap: 1.8rem; padding-block: calc(70px + 2rem) 1rem; }
+  .about-photo { max-width: 300px; order: -1; }
   .principles { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; gap: 2.2rem; }
   footer.site .shell { justify-content: center; text-align: center; }

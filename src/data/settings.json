@@ -2,6 +2,19 @@
   "availability": "employed",
   "contactEmail": "aamishuvo@gmail.com",
   "leadEndpoint": "",
+  "aboutPhoto": "/assets/img/portrait.webp",
+  "sections": {
+    "showTrack": true,
+    "showMetrics": true,
+    "showProjects": true,
+    "showEducation": true,
+    "showBoard": false,
+    "showDiagnostic": true,
+    "showMethod": false,
+    "showBlogOnHome": false
+  },
+  "navShowBoard": false,
+  "navShowDiagnostic": false,
   "linkedin": "https://www.linkedin.com/in/iamshuvo/",
   "github": "",
   "social": [

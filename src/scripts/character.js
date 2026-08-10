@@ -1,11 +1,13 @@
 // Hero avatar.
 //
-// Two modes:
-//   1. A rigged .glb dropped in from the admin (settings.avatarModel). Its head
-//      bone follows the pointer, its arms/legs are animated procedurally for the
-//      dance, and ARKit-style blendshapes drive blinking and smiling if present.
-//   2. Otherwise a built-in low-poly figure — jeans, tee, open blazer, sneakers —
-//      with the same behaviour.
+// Three modes, in order of preference:
+//   1. A rigged .glb (settings.avatarModel). Head and neck bones follow the pointer,
+//      arms/legs are animated procedurally for the dance, and ARKit-style blendshapes
+//      drive blinking and smiling when the model provides them.
+//   2. An illustrated portrait (settings.avatarImage) on a gently bowed plane, which
+//      keeps the artwork's own shading and parallaxes toward the pointer.
+//   3. Otherwise a built-in figure — jeans, tee, open blazer, sneakers — built from
+//      lathed profiles, with the same behaviour.
 //
 // Both are bundled at build time; nothing is fetched from a third party at runtime.
 
@@ -84,7 +86,7 @@ function init(stage) {
     });
     const blazer = cloth(0x2b3038, 0.88, 0x93a3b8);
     const blazerDark = cloth(0x21252c, 0.9, 0x7f8ea3);
-    const tee = cloth(0xa9adb2, 0.95, 0xffffff);
+    const tee = cloth(0xb6babf, 0.95, 0xffffff);
     const denim = cloth(0x47678d, 0.93, 0x9fc0e0);
     const denimDark = cloth(0x3b587b, 0.94, 0x8fb0d4);
     // skin: slight clearcoat reads as the natural sheen of skin
@@ -92,6 +94,7 @@ function init(stage) {
     const skinDark = P({ color: 0x976542, roughness: 0.66, clearcoat: 0.22, clearcoatRoughness: 0.65 });
     const hair = P({ color: 0x191512, roughness: 0.5, clearcoat: 0.55, clearcoatRoughness: 0.42 });
     const dark = P({ color: 0x15171b, roughness: 0.55 });
+    const mouthMat = P({ color: 0x5b3226, roughness: 0.5 });
     const white = P({ color: 0xf8f6f0, roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.15 });
     const iris = P({ color: 0x3d2716, roughness: 0.25, clearcoat: 0.8, clearcoatRoughness: 0.1 });
     const frameMat = P({ color: 0x40301f, roughness: 0.3, metalness: 0.45, clearcoat: 0.5 });
@@ -99,26 +102,38 @@ function init(stage) {
     const sneaker = cloth(0x74787e, 0.88, 0xb8c2cc);
 
     const cast = (m) => { m.castShadow = true; return m; };
-    const cap = (r, len, mat) => cast(new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 18), mat));
-    const sph = (r, mat, w = 26, h = 20) => cast(new THREE.Mesh(new THREE.SphereGeometry(r, w, h), mat));
-    const box = (w, h, d, mat) => cast(new THREE.Mesh(new THREE.BoxGeometry(w, h, d, 2, 2, 2), mat));
-    const cyl = (rt, rb, h, mat, s = 22) => cast(new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, s), mat));
+    const cap = (r, len, mat) => cast(new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 8, 20), mat));
+    const sph = (r, mat, w = 28, h = 22) => cast(new THREE.Mesh(new THREE.SphereGeometry(r, w, h), mat));
+    const cyl = (rt, rb, h, mat, s = 24) => cast(new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, s), mat));
+    // a lathed profile gives smooth, tapered body forms instead of straight tubes
+    const lathe = (profile, mat, phiStart = 0, phiLength = Math.PI * 2, seg = 32) => {
+      const pts = profile.map(([r, y]) => new THREE.Vector2(r, y));
+      const g = new THREE.LatheGeometry(pts, seg, phiStart, phiLength);
+      const m = cast(new THREE.Mesh(g, mat));
+      if (phiLength < Math.PI * 2) m.material = mat.clone(), m.material.side = THREE.DoubleSide;
+      return m;
+    };
 
     const root = new THREE.Group();
+
+    // LatheGeometry starts its sweep at +Z, so phi = 0 is already the front
+    const FRONT = 0;
+    const GAP = Math.PI * 0.14;
 
     // ── legs: jeans + sneakers ──
     const mkLeg = (side) => {
       const g = new THREE.Group();
-      g.position.set(0.19 * side, 1.12, 0);
-      const thigh = cap(0.145, 0.44, denim); thigh.position.y = -0.31;
-      const knee = new THREE.Group(); knee.position.y = -0.62;
-      const shin = cap(0.115, 0.42, denimDark); shin.position.y = -0.26;
-      const shoe = cap(0.105, 0.2, sneaker);
+      g.position.set(0.165 * side, 1.16, 0);
+      const thigh = lathe([[0.001, 0.04], [0.155, 0], [0.15, -0.16], [0.132, -0.36], [0.118, -0.52], [0.001, -0.55]], denim);
+      const knee = new THREE.Group(); knee.position.y = -0.54;
+      const shin = lathe([[0.001, 0.03], [0.115, 0], [0.108, -0.16], [0.09, -0.36], [0.082, -0.48], [0.001, -0.5]], denimDark);
+      const ankle = cyl(0.078, 0.072, 0.05, denimDark); ankle.position.y = -0.49;
+      const shoe = cap(0.088, 0.19, sneaker);
       shoe.rotation.x = Math.PI / 2;
-      shoe.position.set(0, -0.49, 0.09);
-      const sole = box(0.21, 0.06, 0.38, soleMat);
-      sole.position.set(0, -0.56, 0.08);
-      knee.add(shin, shoe, sole);
+      shoe.position.set(0, -0.55, 0.085);
+      const sole = cast(new THREE.Mesh(new THREE.BoxGeometry(0.185, 0.055, 0.34, 2, 2, 2), soleMat));
+      sole.position.set(0, -0.6, 0.075);
+      knee.add(shin, ankle, shoe, sole);
       g.add(thigh, knee);
       g.userData.knee = knee;
       return g;
@@ -128,70 +143,75 @@ function init(stage) {
 
     // ── torso ──
     const torso = new THREE.Group();
-    torso.position.y = 1.12;
+    torso.position.y = 1.16;
     root.add(torso);
 
-    // grey tee underneath
-    const teeMesh = cyl(0.3, 0.33, 0.95, tee);
-    teeMesh.position.y = 0.52;
-    const teeCollar = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.028, 8, 20), tee);
+    // hips fill the gap between the legs so they read as one body
+    const hips = lathe([[0.0, -0.16], [0.19, -0.12], [0.25, -0.04], [0.26, 0.06], [0.001, 0.1]], denim);
+    torso.add(hips);
+
+    // grey tee: a full tapered shell under the jacket
+    const teeProfile = [
+      [0.001, -0.02], [0.255, 0.02], [0.27, 0.2], [0.285, 0.45], [0.29, 0.66],
+      [0.275, 0.84], [0.24, 0.95], [0.155, 1.0]
+    ];
+    torso.add(lathe(teeProfile, tee));
+    const teeCollar = cast(new THREE.Mesh(new THREE.TorusGeometry(0.115, 0.026, 10, 24), tee));
     teeCollar.rotation.x = Math.PI / 2;
     teeCollar.position.y = 1.0;
-    // open blazer: two front panels + back shell
-    const back = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.34, 0.4, 1.06, 22, 1, true, Math.PI * 0.42, Math.PI * 1.16), blazer);
-    back.position.y = 0.55;
-    const panelL = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.345, 0.4, 1.06, 14, 1, true, Math.PI * 1.62, Math.PI * 0.4), blazer);
-    panelL.position.y = 0.55;
-    const panelR = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.345, 0.4, 1.06, 14, 1, true, Math.PI * 1.02, Math.PI * 0.4), blazer);
-    panelR.position.y = 0.55;
-    [back, panelL, panelR].forEach((m) => { m.castShadow = true; m.material.side = THREE.DoubleSide; });
-    // lapels: thin darker strips following the jacket opening
-    const mkLapel = (side) => {
-      const l = cast(new THREE.Mesh(
-        new THREE.CylinderGeometry(0.352, 0.36, 0.62, 10, 1, true,
-          side < 0 ? Math.PI * 1.58 : Math.PI * 1.28, Math.PI * 0.14), blazerDark));
-      l.material.side = THREE.DoubleSide;
-      l.position.y = 0.76;
-      return l;
-    };
-    const lapL = mkLapel(-1), lapR = mkLapel(1);
+    torso.add(teeCollar);
+
+    // open blazer: the same silhouette, slightly larger, with a V left open at the front
+    const coatProfile = [
+      [0.29, -0.06], [0.3, 0.12], [0.315, 0.38], [0.325, 0.62],
+      [0.318, 0.82], [0.29, 0.94], [0.2, 1.02]
+    ];
+    torso.add(lathe(coatProfile, blazer, FRONT + GAP, Math.PI * 2 - GAP * 2));
+
+    // lapels: narrow darker bands running down each side of the opening
+    const lapelProfile = [
+      [0.322, 0.42], [0.332, 0.62], [0.326, 0.82], [0.3, 0.94], [0.21, 1.02]
+    ];
+    torso.add(lathe(lapelProfile, blazerDark, FRONT + GAP * 0.86, Math.PI * 0.13));
+    torso.add(lathe(lapelProfile, blazerDark, FRONT - GAP * 0.86 - Math.PI * 0.13, Math.PI * 0.13));
+
+    // shoulders: a rounded yoke so the arms attach believably
     const shoulders = cast(new THREE.Mesh(
-      new THREE.SphereGeometry(0.35, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.5), blazer));
-    shoulders.position.y = 1.02;
-    shoulders.scale.set(1.16, 0.5, 0.98);
-    torso.add(teeMesh, teeCollar, back, panelL, panelR, lapL, lapR, shoulders);
+      new THREE.SphereGeometry(0.32, 28, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), blazer));
+    shoulders.position.y = 0.9;
+    shoulders.scale.set(1.24, 0.62, 1.02);
+    torso.add(shoulders);
 
     // ── arms ──
     const mkArm = (side) => {
       const sh = new THREE.Group();
-      sh.position.set(0.42 * side, 1.0, 0);
-      const upper = cap(0.1, 0.4, blazer); upper.position.y = -0.29;
-      const elbow = new THREE.Group(); elbow.position.y = -0.56;
-      const fore = cap(0.085, 0.34, blazer); fore.position.y = -0.23;
-      const cuff = cyl(0.088, 0.088, 0.05, tee); cuff.position.y = -0.42;
+      sh.position.set(0.36 * side, 0.94, 0);
+      const cap0 = sph(0.115, blazer, 20, 16);
+      cap0.scale.set(1, 0.9, 1);
+      const upper = lathe([[0.001, 0.03], [0.105, 0], [0.1, -0.16], [0.088, -0.34], [0.082, -0.46], [0.001, -0.49]], blazer);
+      const elbow = new THREE.Group(); elbow.position.y = -0.48;
+      const fore = lathe([[0.001, 0.03], [0.084, 0], [0.08, -0.14], [0.07, -0.3], [0.066, -0.4], [0.001, -0.43]], blazer);
+      const cuff = cyl(0.072, 0.07, 0.05, blazerDark); cuff.position.y = -0.41;
 
       // hand: palm + four curled fingers + an opposed thumb
       const hand = new THREE.Group();
-      hand.position.y = -0.47;
-      const palm = cast(new THREE.Mesh(new THREE.SphereGeometry(0.072, 18, 14), skin));
-      palm.scale.set(1, 1.1, 0.62);
+      hand.position.y = -0.45;
+      const palm = sph(0.066, skin, 20, 16);
+      palm.scale.set(1, 1.12, 0.6);
       hand.add(palm);
       for (let i = 0; i < 4; i++) {
-        const f = cap(0.019, 0.055, skin);
-        f.position.set((i - 1.5) * 0.031, -0.085, 0.006);
-        f.rotation.x = 0.32 + i * 0.04;
+        const f = cap(0.017, 0.05, skin);
+        f.position.set((i - 1.5) * 0.028, -0.078, 0.004);
+        f.rotation.x = 0.3 + i * 0.04;
         hand.add(f);
       }
-      const thumb = cap(0.022, 0.038, skin);
-      thumb.position.set(0.055 * side, -0.035, 0.028);
-      thumb.rotation.set(0.3, 0, -0.85 * side);
+      const thumb = cap(0.02, 0.034, skin);
+      thumb.position.set(0.05 * side, -0.03, 0.026);
+      thumb.rotation.set(0.28, 0, -0.85 * side);
       hand.add(thumb);
 
       elbow.add(fore, cuff, hand);
-      sh.add(upper, elbow);
+      sh.add(cap0, upper, elbow);
       sh.userData.elbow = elbow;
       return sh;
     };
@@ -199,81 +219,95 @@ function init(stage) {
     torso.add(armL, armR);
 
     // ── head ──
-    const neck = cyl(0.1, 0.13, 0.2, skin);
-    neck.position.y = 1.14;
+    const neck = lathe([[0.001, -0.02], [0.098, 0], [0.094, 0.1], [0.105, 0.2], [0.001, 0.24]], skin);
+    neck.position.y = 0.98;
     torso.add(neck);
 
     const head = new THREE.Group();
-    head.position.y = 1.5;
+    head.position.y = 1.42;
     torso.add(head);
 
-    const skull = sph(0.4, skin, 30, 24);
-    skull.scale.set(0.92, 1.07, 0.96);
-    const jaw = sph(0.3, skin, 20, 16);
-    jaw.scale.set(0.92, 0.72, 0.9);
-    jaw.position.set(0, -0.2, 0.04);
+    const skull = sph(0.37, skin, 36, 28);
+    skull.scale.set(0.93, 1.06, 0.97);
+    const jaw = sph(0.28, skin, 26, 20);
+    jaw.scale.set(0.93, 0.74, 0.92);
+    jaw.position.set(0, -0.18, 0.035);
 
+    // hair: cap set back off the forehead, with a small quiff
     const hairCap = cast(new THREE.Mesh(
-      new THREE.SphereGeometry(0.415, 28, 18, 0, Math.PI * 2, 0, Math.PI * 0.44), hair));
-    hairCap.scale.set(0.96, 1.02, 0.99);
-    hairCap.position.set(0, 0.1, -0.05);
-    const quiff = sph(0.15, hair, 18, 14);
-    quiff.scale.set(1.55, 0.5, 0.95);
-    quiff.position.set(0, 0.38, 0.14);
-    quiff.rotation.x = -0.28;
+      new THREE.SphereGeometry(0.386, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.42), hair));
+    hairCap.scale.set(0.96, 1.03, 0.99);
+    hairCap.position.set(0, 0.09, -0.045);
+    const quiff = sph(0.14, hair, 20, 16);
+    quiff.scale.set(1.5, 0.48, 0.92);
+    quiff.position.set(0, 0.34, 0.13);
+    quiff.rotation.x = -0.26;
+    const napeHair = cast(new THREE.Mesh(
+      new THREE.SphereGeometry(0.375, 24, 16, Math.PI * 0.75, Math.PI * 0.5, Math.PI * 0.28, Math.PI * 0.36), hair));
+    napeHair.position.set(0, 0.02, 0);
 
-    // beard shell around the jaw, cheeks left clear
+    // beard: hugs the jaw only, so the cheeks stay skin
     const beard = cast(new THREE.Mesh(
-      new THREE.SphereGeometry(0.395, 28, 20, 0, Math.PI * 2, Math.PI * 0.55, Math.PI * 0.45), hair));
-    beard.scale.set(0.94, 1.18, 0.95);
-    beard.position.set(0, -0.05, 0.05);
-    const stache = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.032, 0.12, 4, 12), hair));
+      new THREE.SphereGeometry(0.362, 32, 24, 0, Math.PI * 2, Math.PI * 0.62, Math.PI * 0.38), hair));
+    beard.scale.set(0.97, 1.32, 0.98);
+    beard.position.set(0, -0.015, 0.03);
+    const sideburnL = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.032, 0.1, 4, 10), hair));
+    sideburnL.position.set(-0.3, -0.03, 0.055);
+    const sideburnR = sideburnL.clone(); sideburnR.position.x = 0.3;
+    const stache = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.029, 0.115, 5, 14), hair));
     stache.rotation.z = Math.PI / 2;
-    stache.position.set(0, -0.145, 0.35);
+    stache.position.set(0, -0.128, 0.315);
+    const mouth = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.014, 0.07, 4, 10), mouthMat));
+    mouth.rotation.z = Math.PI / 2;
+    mouth.position.set(0, -0.172, 0.318);
 
-    const earL = sph(0.055, skinDark, 14, 12);
-    earL.scale.set(0.5, 1.05, 0.8);
-    earL.position.set(-0.37, 0.01, 0);
-    const earR = earL.clone(); earR.position.x = 0.37;
+    const earL = sph(0.05, skinDark, 16, 14);
+    earL.scale.set(0.48, 1.1, 0.82);
+    earL.position.set(-0.345, 0.005, 0);
+    const earR = earL.clone(); earR.position.x = 0.345;
 
-    const nose = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.042, 0.075, 5, 12), skinDark));
-    nose.position.set(0, -0.015, 0.38);
+    const nose = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.038, 0.062, 6, 14), skinDark));
+    nose.position.set(0, -0.025, 0.345);
 
     const mkEye = (side) => {
       const g = new THREE.Group();
-      g.position.set(0.135 * side, 0.09, 0.32);
-      const ball = sph(0.055, white, 18, 14);
-      ball.scale.set(1.15, 1, 0.7);
-      const ir = sph(0.026, iris, 14, 10); ir.position.z = 0.037;
-      const pu = sph(0.013, dark, 10, 8); pu.position.z = 0.056;
-      g.add(ball, ir, pu);
+      g.position.set(0.125 * side, 0.075, 0.295);
+      const ball = sph(0.05, white, 20, 16);
+      ball.scale.set(1.16, 1, 0.66);
+      const ir = sph(0.024, iris, 16, 12); ir.position.z = 0.033;
+      const pu = sph(0.012, dark, 12, 10); pu.position.z = 0.05;
+      const lid = cast(new THREE.Mesh(
+        new THREE.SphereGeometry(0.054, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.34), skin));
+      lid.scale.set(1.16, 1, 0.7);
+      lid.position.y = 0.006;
+      g.add(ball, ir, pu, lid);
       return g;
     };
     const eyeL = mkEye(-1), eyeR = mkEye(1);
 
-    const browL = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.019, 0.095, 4, 10), hair));
+    const browL = cast(new THREE.Mesh(new THREE.CapsuleGeometry(0.017, 0.085, 5, 12), hair));
     browL.rotation.z = Math.PI / 2 + 0.1;
-    browL.position.set(-0.135, 0.2, 0.345);
+    browL.position.set(-0.125, 0.175, 0.315);
     const browR = browL.clone();
-    browR.position.x = 0.135; browR.rotation.z = Math.PI / 2 - 0.1;
+    browR.position.x = 0.125; browR.rotation.z = Math.PI / 2 - 0.1;
 
     const mkFrame = (side) => {
-      const f = cast(new THREE.Mesh(new THREE.TorusGeometry(0.098, 0.011, 10, 26), frameMat));
-      f.position.set(0.14 * side, 0.09, 0.375);
-      f.scale.set(1.3, 1.05, 1);
+      const f = cast(new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.0095, 12, 28), frameMat));
+      f.position.set(0.128 * side, 0.075, 0.345);
+      f.scale.set(1.3, 1.06, 1);
       return f;
     };
     const frameL = mkFrame(-1), frameR = mkFrame(1);
-    const bridge = box(0.075, 0.014, 0.014, frameMat);
-    bridge.position.set(0, 0.12, 0.385);
-    const templeL = box(0.014, 0.014, 0.3, frameMat);
-    templeL.position.set(-0.3, 0.11, 0.23);
-    templeL.rotation.y = 0.22;
+    const bridge = cast(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.012, 0.012), frameMat));
+    bridge.position.set(0, 0.1, 0.352);
+    const templeL = cast(new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.28), frameMat));
+    templeL.position.set(-0.275, 0.095, 0.215);
+    templeL.rotation.y = 0.2;
     const templeR = templeL.clone();
-    templeR.position.x = 0.3; templeR.rotation.y = -0.22;
+    templeR.position.x = 0.275; templeR.rotation.y = -0.2;
 
-    head.add(skull, jaw, hairCap, quiff, beard, stache, earL, earR, nose,
-      eyeL, eyeR, browL, browR, frameL, frameR, bridge, templeL, templeR);
+    head.add(skull, jaw, hairCap, quiff, napeHair, beard, sideburnL, sideburnR, stache, mouth,
+      earL, earR, nose, eyeL, eyeR, browL, browR, frameL, frameR, bridge, templeL, templeR);
 
     return {
       kind: 'figure',

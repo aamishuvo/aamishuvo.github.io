@@ -53,7 +53,8 @@ const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
         <a href={homeHref + '#contact'}>{t.nav.contact}</a>
       </nav>
       <button class="zb-toggle" id="zbToggle" aria-pressed="false"
-        data-hint-on={t.zb.hintOn} data-hint-off={t.zb.hintOff}>
+        data-hint-on={t.zb.hintOn} data-hint-off={t.zb.hintOff}
+        data-label-alt={t.zb.labelAlt || (lang === 'bn' ? 'কর্পোরেট মোড' : 'Corporate mode')}>
         <span class="zb-word">{t.zb.label}</span><i></i>
       </button>
       <a class="lang-switch" href={t.langSwitch.href}>{t.langSwitch.label}</a>

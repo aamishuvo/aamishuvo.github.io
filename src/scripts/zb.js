@@ -1,16 +1,69 @@
-// Zero Bullshit mode: dark theme, blunter copy, generative music loop.
-// Copy variants live in data-zb-alt attributes; the original text is stashed
-// on first toggle so the swap is reversible.
+// Zero Bullshit mode: dark theme, blunter copy, generative music loop —
+// switched with a radial wipe from the toggle and a text-scramble on the copy.
+// Copy variants live in data-zb-alt attributes; originals are stashed on first
+// toggle so the swap is reversible.
 
 const root = document.documentElement;
 const toggle = document.getElementById('zbToggle');
 const hint = document.getElementById('zbHint');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function swapCopy(on) {
-  document.querySelectorAll('[data-zb-alt]').forEach((el) => {
+/* ── text scramble ─────────────────────────────── */
+const GLYPHS = '▪▫▚▞#%&$@!?/\\<>-_=+*';
+
+function scrambleTo(el, text, dur = 420) {
+  if (reduced) { el.textContent = text; return; }
+  const from = el.textContent;
+  const len = Math.max(from.length, text.length);
+  const t0 = performance.now();
+  (function tick(now) {
+    const p = Math.min(1, (now - t0) / dur);
+    let out = '';
+    for (let i = 0; i < len; i++) {
+      const reveal = i / len < p * 1.4 - 0.2;
+      if (reveal || p === 1) out += text[i] || '';
+      else if (Math.random() < 0.28) out += GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      else out += (from[i] || text[i] || '');
+    }
+    el.textContent = out;
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = text;
+  })(t0);
+}
+
+function swapCopy(on, animate = true) {
+  document.querySelectorAll('[data-zb-alt]').forEach((el, i) => {
     if (el.dataset.zbOrig === undefined) el.dataset.zbOrig = el.textContent;
-    el.textContent = on ? el.dataset.zbAlt : el.dataset.zbOrig;
+    const next = on ? el.dataset.zbAlt : el.dataset.zbOrig;
+    if (animate) setTimeout(() => scrambleTo(el, next), i * 40);
+    else el.textContent = next;
   });
+  // toggle word flips to name the mode you'd switch to
+  const word = toggle.querySelector('.zb-word');
+  if (word) {
+    if (word.dataset.orig === undefined) word.dataset.orig = word.textContent;
+    const alt = toggle.dataset.labelAlt || word.dataset.orig;
+    word.textContent = on ? alt : word.dataset.orig;
+  }
+}
+
+/* ── radial wipe from the toggle button ────────── */
+function wipe(on) {
+  if (reduced) return;
+  const r = toggle.getBoundingClientRect();
+  const x = r.left + r.width / 2, y = r.top + r.height / 2;
+  const el = document.createElement('div');
+  el.className = 'zb-wipe';
+  el.style.background = on ? '#0c0c10' : '#f4f1ea';
+  el.style.clipPath = `circle(0px at ${x}px ${y}px)`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => {
+    el.style.clipPath = `circle(160vmax at ${x}px ${y}px)`;
+  });
+  setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 500);
+  }, 620);
 }
 
 /* ── generative music ──────────────────────────────
@@ -25,13 +78,13 @@ function makeAudio() {
   out.connect(ctx.destination);
 
   const bpm = 96;
-  const spb = 60 / bpm;      // seconds per beat
-  const step = spb / 4;      // 16th notes
-  let cursor = 0;            // next step index
+  const spb = 60 / bpm;
+  const step = spb / 4;
+  let cursor = 0;
   let timer = null;
 
-  const bassNotes = [41.2, 41.2, 49.0, 41.2, 41.2, 55.0, 49.0, 46.2]; // E1-ish riff
-  const stabChord = [164.8, 196.0, 246.9]; // Em triad
+  const bassNotes = [41.2, 41.2, 49.0, 41.2, 41.2, 55.0, 49.0, 46.2];
+  const stabChord = [164.8, 196.0, 246.9];
 
   function kick(t) {
     const o = ctx.createOscillator(), g = ctx.createGain();
@@ -76,8 +129,8 @@ function makeAudio() {
     }
   }
 
+  let startAt = 0;
   function schedule() {
-    // keep ~200ms of audio queued ahead of the clock
     while (cursor * step < ctx.currentTime + 0.2 - startAt + 0.0001) {
       const t = startAt + cursor * step;
       const s16 = cursor % 16;
@@ -88,7 +141,6 @@ function makeAudio() {
       cursor++;
     }
   }
-  let startAt = 0;
 
   return {
     ctx,
@@ -119,12 +171,18 @@ function showHint(text) {
 }
 
 function apply(on, { silent = false } = {}) {
-  if (on) root.dataset.zb = ''; else delete root.dataset.zb;
-  toggle.setAttribute('aria-pressed', String(on));
-  swapCopy(on);
+  const flip = () => {
+    if (on) root.dataset.zb = ''; else delete root.dataset.zb;
+    toggle.setAttribute('aria-pressed', String(on));
+    swapCopy(on, !silent);
+    dispatchEvent(new CustomEvent('zbchange', { detail: { on } }));
+  };
   localStorage.setItem('zb', on ? '1' : '0');
-  dispatchEvent(new CustomEvent('zbchange', { detail: { on } }));
-  if (silent) return;
+  if (silent || reduced) { flip(); return; }
+
+  wipe(on);
+  // theme flips mid-wipe so the sweep reveals the new mode
+  setTimeout(flip, 240);
   showHint(on ? toggle.dataset.hintOn : toggle.dataset.hintOff);
   if (on) {
     if (!audio) audio = makeAudio();

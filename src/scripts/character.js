@@ -1,5 +1,5 @@
-// Stylized low-poly 3D avatar in Three.js — modeled after the portrait:
-// charcoal suit, light-blue shirt, full beard, rectangular glasses.
+// Stylized 3D avatar in Three.js — modeled after the portrait: charcoal suit,
+// light-blue shirt, full beard, rectangular glasses, hands in pockets.
 // Head follows the pointer; the whole body dances in Zero Bullshit mode.
 
 import * as THREE from 'three';
@@ -11,38 +11,54 @@ function init(stage) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 50);
-  camera.position.set(0, 2.1, 7.2);
-  camera.lookAt(0, 1.55, 0);
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
+  camera.position.set(0.4, 2.0, 7.6);
+  camera.lookAt(0, 1.5, 0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   stage.prepend(renderer.domElement);
 
   // ── lights ──
-  scene.add(new THREE.HemisphereLight(0xfff6e8, 0x8a8271, 1.15));
-  const key = new THREE.DirectionalLight(0xffffff, 1.6);
-  key.position.set(3, 5, 4);
+  scene.add(new THREE.HemisphereLight(0xfff4e4, 0x6e6a5c, 1.05));
+  const key = new THREE.DirectionalLight(0xffffff, 1.9);
+  key.position.set(3, 6, 4);
+  key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024);
+  key.shadow.camera.left = -3; key.shadow.camera.right = 3;
+  key.shadow.camera.top = 5; key.shadow.camera.bottom = -1;
+  key.shadow.radius = 6;
   scene.add(key);
-  const rim = new THREE.DirectionalLight(0xe6432d, 1.1);
-  rim.position.set(-4, 3, -3);
+  const fill = new THREE.DirectionalLight(0xcfe4ff, 0.5);
+  fill.position.set(-3, 2, 3);
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xe6432d, 0.9);
+  rim.position.set(-4, 3, -4);
   scene.add(rim);
 
-  // ── materials ──
-  const M = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.05, flatShading: true, ...opts });
-  const suit = M(0x2b2f36);
-  const suitDark = M(0x22252b);
-  const shirt = M(0xbdd9f2);
-  const skin = M(0xa9744f);
-  const hair = M(0x181410, { roughness: 0.95 });
-  const dark = M(0x101010);
-  const white = M(0xf5f2ea, { roughness: 0.4 });
-  const frame = M(0x3a2c1c, { roughness: 0.4, metalness: 0.3 });
-  const belt = M(0x1c1a17);
+  // ── materials (smooth, soft) ──
+  const M = (color, rough = 0.75, opts = {}) =>
+    new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: 0.04, ...opts });
+  const suit = M(0x2c313a, 0.82);
+  const suitDark = M(0x232730, 0.85);
+  const trouser = M(0x262b33, 0.85);
+  const shirt = M(0xc4ddf2, 0.7);
+  const skin = M(0xa9744f, 0.55);
+  const skinDark = M(0x96613f, 0.6);
+  const hair = M(0x171310, 0.95);
+  const dark = M(0x121212, 0.5);
+  const white = M(0xf7f4ec, 0.35);
+  const iris = M(0x3a2415, 0.4);
+  const frameMat = M(0x40301e, 0.35, { metalness: 0.35 });
+  const belt = M(0x1a1815, 0.6);
 
-  const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-  const sph = (r, mat, ws = 12, hs = 10) => new THREE.Mesh(new THREE.SphereGeometry(r, ws, hs), mat);
-  const cyl = (rt, rb, h, mat, seg = 10) => new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+  const shadowed = (mesh) => { mesh.castShadow = true; return mesh; };
+  const box = (w, h, d, mat) => shadowed(new THREE.Mesh(new THREE.BoxGeometry(w, h, d, 2, 2, 2), mat));
+  const sph = (r, mat, ws = 24, hs = 18) => shadowed(new THREE.Mesh(new THREE.SphereGeometry(r, ws, hs), mat));
+  const cap = (r, len, mat) => shadowed(new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 16), mat));
+  const cyl = (rt, rb, h, mat, seg = 20) => shadowed(new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat));
 
   const character = new THREE.Group();
   scene.add(character);
@@ -50,13 +66,12 @@ function init(stage) {
   // ── legs ──
   const mkLeg = (side) => {
     const g = new THREE.Group();
-    g.position.set(0.22 * side, 1.05, 0);
-    const upper = cyl(0.16, 0.14, 0.55, suitDark);
-    upper.position.y = -0.28;
-    const lower = cyl(0.13, 0.11, 0.5, suitDark);
-    lower.position.y = -0.78;
-    const shoe = box(0.24, 0.12, 0.42, dark);
-    shoe.position.set(0, -1.06, 0.08);
+    g.position.set(0.2 * side, 1.06, 0);
+    const upper = cap(0.15, 0.42, trouser); upper.position.y = -0.3;
+    const lower = cap(0.12, 0.4, trouser); lower.position.y = -0.76;
+    const shoe = cap(0.11, 0.2, dark);
+    shoe.rotation.x = Math.PI / 2;
+    shoe.position.set(0, -1.04, 0.1);
     g.add(upper, lower, shoe);
     return g;
   };
@@ -68,39 +83,42 @@ function init(stage) {
   torso.position.y = 1.08;
   character.add(torso);
 
-  const jacket = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.45, 1.05, 8), suit);
+  const jacket = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.44, 1.02, 22, 4), suit));
   jacket.position.y = 0.55;
-  const beltMesh = cyl(0.42, 0.42, 0.1, belt, 8);
-  beltMesh.position.y = 0.02;
-  // shirt wedge visible between the lapels
-  const shirtV = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.95, 3), shirt);
-  shirtV.position.set(0, 0.56, 0.26);
+  const shoulders = shadowed(new THREE.Mesh(
+    new THREE.SphereGeometry(0.345, 22, 14, 0, Math.PI * 2, 0, Math.PI * 0.5), suit));
+  shoulders.position.y = 1.02;
+  shoulders.scale.set(1.15, 0.5, 0.95);
+  const beltMesh = cyl(0.42, 0.42, 0.09, belt);
+  beltMesh.position.y = 0.03;
+  const buckle = box(0.09, 0.06, 0.02, white);
+  buckle.position.set(0, 0.03, 0.42);
+  // shirt wedge between the lapels
+  const shirtV = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.19, 0.95, 3), shirt));
+  shirtV.position.set(0, 0.56, 0.25);
   shirtV.rotation.y = Math.PI;
   // lapels
-  const lapelL = box(0.16, 0.75, 0.05, suitDark);
-  lapelL.position.set(-0.17, 0.62, 0.36);
-  lapelL.rotation.z = 0.22;
+  const lapelL = box(0.15, 0.72, 0.04, suitDark);
+  lapelL.position.set(-0.16, 0.62, 0.35);
+  lapelL.rotation.z = 0.24;
   const lapelR = lapelL.clone();
-  lapelR.position.x = 0.17;
-  lapelR.rotation.z = -0.22;
+  lapelR.position.x = 0.16; lapelR.rotation.z = -0.24;
   // buttons
-  const btn1 = sph(0.025, white, 8, 6); btn1.position.set(0, 0.32, 0.42);
-  const btn2 = btn1.clone(); btn2.position.y = 0.18;
-  torso.add(jacket, beltMesh, shirtV, lapelL, lapelR, btn1, btn2);
+  const btn1 = sph(0.023, white, 12, 8); btn1.position.set(0, 0.3, 0.415);
+  const btn2 = btn1.clone(); btn2.position.y = 0.16;
+  torso.add(jacket, shoulders, beltMesh, buckle, shirtV, lapelL, lapelR, btn1, btn2);
 
   // ── arms ──
   const mkArm = (side) => {
     const shoulder = new THREE.Group();
-    shoulder.position.set(0.44 * side, 1.05, 0);
-    const upper = cyl(0.11, 0.1, 0.55, suit);
-    upper.position.y = -0.3;
+    shoulder.position.set(0.43 * side, 1.0, 0);
+    const upper = cap(0.105, 0.4, suit); upper.position.y = -0.29;
     const elbow = new THREE.Group();
-    elbow.position.y = -0.58;
-    const fore = cyl(0.09, 0.08, 0.5, suit);
-    fore.position.y = -0.27;
-    const hand = sph(0.1, skin, 10, 8);
-    hand.position.y = -0.55;
-    elbow.add(fore, hand);
+    elbow.position.y = -0.56;
+    const fore = cap(0.09, 0.36, suit); fore.position.y = -0.24;
+    const cuff = cyl(0.095, 0.095, 0.05, shirt); cuff.position.y = -0.44;
+    const hand = sph(0.095, skin, 16, 12); hand.position.y = -0.52;
+    elbow.add(fore, cuff, hand);
     shoulder.add(upper, elbow);
     shoulder.userData.elbow = elbow;
     return shoulder;
@@ -109,74 +127,86 @@ function init(stage) {
   torso.add(armL, armR);
 
   // ── head ──
-  const neck = cyl(0.12, 0.14, 0.18, skin, 8);
-  neck.position.y = 1.18;
+  const neck = cyl(0.11, 0.14, 0.2, skin);
+  neck.position.y = 1.16;
   torso.add(neck);
 
   const head = new THREE.Group();
-  head.position.y = 1.55;
+  head.position.y = 1.52;
   torso.add(head);
 
-  const skull = sph(0.42, skin, 14, 12);
-  skull.scale.set(0.92, 1.05, 0.95);
-  // hair: a slightly bigger upper cap, pushed back so the forehead shows
-  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.44, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.4), hair);
-  hairCap.scale.set(0.95, 1.02, 0.98);
-  hairCap.position.set(0, 0.12, -0.08);
-  // beard: a lower-jaw shell only — cheeks and nose stay skin
-  const beard = new THREE.Mesh(new THREE.SphereGeometry(0.41, 14, 10, 0, Math.PI * 2, Math.PI * 0.62, Math.PI * 0.38), hair);
-  beard.scale.set(0.88, 1.05, 0.9);
-  beard.position.set(0, -0.08, 0.09);
-  // moustache hint above the beard line
-  const stache = box(0.2, 0.05, 0.06, hair);
-  stache.position.set(0, -0.14, 0.38);
+  const skull = sph(0.42, skin);
+  skull.scale.set(0.9, 1.06, 0.94);
+  // hair: back-swept cap plus a short front quiff, like the portrait
+  const hairCap = shadowed(new THREE.Mesh(
+    new THREE.SphereGeometry(0.44, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.42), hair));
+  hairCap.scale.set(0.94, 1.0, 0.97);
+  hairCap.position.set(0, 0.11, -0.07);
+  const quiff = sph(0.16, hair, 16, 12);
+  quiff.scale.set(1.5, 0.5, 0.9);
+  quiff.position.set(0, 0.4, 0.16);
+  quiff.rotation.x = -0.3;
+  const sideburnL = box(0.05, 0.18, 0.1, hair);
+  sideburnL.position.set(-0.36, -0.02, 0.08);
+  const sideburnR = sideburnL.clone(); sideburnR.position.x = 0.36;
+  // full beard on the jaw, cheeks and nose left clear
+  const beard = shadowed(new THREE.Mesh(
+    new THREE.SphereGeometry(0.415, 24, 16, 0, Math.PI * 2, Math.PI * 0.58, Math.PI * 0.42), hair));
+  beard.scale.set(0.9, 1.12, 0.92);
+  beard.position.set(0, -0.06, 0.07);
+  const stache = shadowed(new THREE.Mesh(new THREE.CapsuleGeometry(0.035, 0.13, 4, 10), hair));
+  stache.rotation.z = Math.PI / 2;
+  stache.position.set(0, -0.155, 0.37);
   // ears
-  const earL = sph(0.07, skin, 8, 6); earL.position.set(-0.39, 0, 0);
-  const earR = earL.clone(); earR.position.x = 0.39;
+  const earL = sph(0.06, skinDark, 12, 10); earL.position.set(-0.38, 0.02, 0); earL.scale.set(0.5, 1, 0.8);
+  const earR = earL.clone(); earR.position.x = 0.38;
   // nose
-  const nose = box(0.09, 0.14, 0.1, skin);
-  nose.position.set(0, -0.02, 0.4);
-  // eyes
+  const nose = shadowed(new THREE.Mesh(new THREE.CapsuleGeometry(0.045, 0.08, 4, 10), skinDark));
+  nose.position.set(0, -0.01, 0.4);
+  // eyes: white + brown iris + pupil, lids blink by scaling
   const mkEye = (side) => {
     const g = new THREE.Group();
-    g.position.set(0.15 * side, 0.1, 0.34);
-    const ball = sph(0.06, white, 8, 6);
-    const pupil = sph(0.028, dark, 6, 5);
-    pupil.position.z = 0.045;
-    g.add(ball, pupil);
+    g.position.set(0.14 * side, 0.1, 0.33);
+    const ball = sph(0.058, white, 14, 10);
+    ball.scale.set(1.15, 1, 0.7);
+    const ir = sph(0.028, iris, 12, 8); ir.position.z = 0.038;
+    const pupil = sph(0.014, dark, 8, 6); pupil.position.z = 0.06;
+    g.add(ball, ir, pupil);
     return g;
   };
   const eyeL = mkEye(-1), eyeR = mkEye(1);
   // brows
-  const browL = box(0.14, 0.03, 0.04, hair);
-  browL.position.set(-0.15, 0.22, 0.36);
-  browL.rotation.z = 0.08;
-  const browR = browL.clone(); browR.position.x = 0.15; browR.rotation.z = -0.08;
-  // glasses: two rounded-rect frames + bridge + temples
+  const browL = shadowed(new THREE.Mesh(new THREE.CapsuleGeometry(0.02, 0.1, 4, 8), hair));
+  browL.rotation.z = Math.PI / 2 + 0.12;
+  browL.position.set(-0.14, 0.21, 0.36);
+  const browR = browL.clone(); browR.position.x = 0.14; browR.rotation.z = Math.PI / 2 - 0.12;
+  // rectangular glasses
   const mkFrame = (side) => {
-    const f = new THREE.Mesh(new THREE.TorusGeometry(0.105, 0.016, 6, 14), frame);
-    f.position.set(0.15 * side, 0.1, 0.4);
-    f.scale.set(1.25, 1, 1);
+    const f = shadowed(new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.012, 10, 24), frameMat));
+    f.position.set(0.145 * side, 0.1, 0.39);
+    f.scale.set(1.35, 1.05, 1);
     return f;
   };
   const frameL = mkFrame(-1), frameR = mkFrame(1);
-  const bridge = box(0.09, 0.02, 0.02, frame);
-  bridge.position.set(0, 0.12, 0.41);
-  const templeL = box(0.02, 0.02, 0.3, frame);
-  templeL.position.set(-0.3, 0.11, 0.25);
-  templeL.rotation.y = 0.25;
-  const templeR = templeL.clone(); templeR.position.x = 0.3; templeR.rotation.y = -0.25;
+  const bridge = box(0.08, 0.015, 0.015, frameMat);
+  bridge.position.set(0, 0.13, 0.4);
+  const templeL = box(0.015, 0.015, 0.3, frameMat);
+  templeL.position.set(-0.31, 0.12, 0.24);
+  templeL.rotation.y = 0.22;
+  const templeR = templeL.clone(); templeR.position.x = 0.31; templeR.rotation.y = -0.22;
 
-  head.add(skull, hairCap, beard, stache, earL, earR, nose, eyeL, eyeR, browL, browR, frameL, frameR, bridge, templeL, templeR);
+  head.add(skull, hairCap, quiff, sideburnL, sideburnR, beard, stache,
+    earL, earR, nose, eyeL, eyeR, browL, browR, frameL, frameR, bridge, templeL, templeR);
 
-  // ground shadow blob
-  const blob = new THREE.Mesh(
-    new THREE.CircleGeometry(0.75, 24),
-    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.14 })
+  // ── ground: soft real shadow + faint blob ──
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(8, 8),
+    new THREE.ShadowMaterial({ opacity: 0.16 })
   );
-  blob.rotation.x = -Math.PI / 2;
-  blob.position.y = 0.01;
-  scene.add(blob);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = 0;
+  ground.receiveShadow = true;
+  scene.add(ground);
 
   // ── pointer tracking ──
   const target = new THREE.Vector2(0, 0);
@@ -196,7 +226,6 @@ function init(stage) {
     hintEl.textContent = bn ? 'কার্সর নাড়ান — ও তাকিয়ে আছে' : 'move your cursor — he’s watching';
   }
 
-  // rim light picks up the accent color of the active theme
   function syncRim() {
     const c = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
     try { rim.color.set(c); } catch { /* keep previous */ }
@@ -214,14 +243,17 @@ function init(stage) {
   new ResizeObserver(resize).observe(stage);
   resize();
 
-  // ── blink ──
+  // ── idle pose: hands in pockets, like the portrait ──
+  // {shoulder x/z, elbow x} per side; dance overrides blend on top.
+  const POCKET = { shX: -0.1, shZL: 0.1, elX: -0.45 };
+
   let nextBlink = 2;
   let blinkT = -1;
 
-  // ── animation loop ──
   const BPM = 96;
   const clock = new THREE.Clock();
   let elapsed = 0;
+  const lerp = THREE.MathUtils.lerp;
 
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
@@ -229,49 +261,46 @@ function init(stage) {
     dance += (danceTarget - dance) * Math.min(1, dt * 3);
 
     const t = elapsed;
-    const beat = (t * BPM) / 60; // beats elapsed
+    const beat = (t * BPM) / 60;
 
     // pointer follow (head + slight body turn), eased
     const hx = THREE.MathUtils.clamp(target.x, -1, 1);
     const hy = THREE.MathUtils.clamp(target.y, -1, 1);
     head.rotation.y += ((hx * 0.55) - head.rotation.y) * Math.min(1, dt * 6);
-    head.rotation.x += ((hy * 0.32) - head.rotation.x) * Math.min(1, dt * 6);
-    character.rotation.y += ((hx * 0.18) - character.rotation.y) * Math.min(1, dt * 3);
+    head.rotation.x += ((hy * 0.3) - head.rotation.x) * Math.min(1, dt * 6);
+    character.rotation.y += ((hx * 0.16) - character.rotation.y) * Math.min(1, dt * 3);
 
-    // idle: breathing + micro-sway
-    const idle = 1 - dance;
-    torso.scale.y = 1 + Math.sin(t * 1.6) * 0.012 * idle;
-    torso.rotation.z = Math.sin(t * 0.8) * 0.02 * idle;
-    armL.rotation.z = 0.12 + Math.sin(t * 1.6) * 0.03 * idle;
-    armR.rotation.z = -0.12 - Math.sin(t * 1.6 + 1) * 0.03 * idle;
+    // eyes glance slightly ahead of the head turn
+    const glance = hx * 0.02;
+    eyeL.position.x = -0.14 + glance;
+    eyeR.position.x = 0.14 + glance;
 
-    // dance: bounce, twist, alternating arm pumps, head nod — on the beat
-    if (dance > 0.01 && !reduced) {
-      const bounce = Math.abs(Math.sin(beat * Math.PI)) * 0.16 * dance;
-      character.position.y = bounce;
-      character.rotation.z = Math.sin(beat * Math.PI) * 0.06 * dance;
-      torso.rotation.y = Math.sin(beat * Math.PI * 0.5) * 0.35 * dance;
-      const swing = Math.sin(beat * Math.PI);
-      armL.rotation.x = (-0.6 + swing * 0.9) * dance;
-      armR.rotation.x = (-0.6 - swing * 0.9) * dance;
-      armL.rotation.z = (0.5 + Math.abs(swing) * 0.3) * dance + 0.12 * idle;
-      armR.rotation.z = -(0.5 + Math.abs(swing) * 0.3) * dance - 0.12 * idle;
-      armL.userData.elbow.rotation.x = (-1.1 + swing * 0.5) * dance;
-      armR.userData.elbow.rotation.x = (-1.1 - swing * 0.5) * dance;
-      legL.rotation.x = swing * 0.25 * dance;
-      legR.rotation.x = -swing * 0.25 * dance;
-      head.rotation.x += Math.sin(beat * Math.PI * 2) * 0.08 * dance;
-    } else {
-      character.position.y *= 0.9;
-      torso.rotation.y *= 0.92;
-      armL.rotation.x *= 0.9;
-      armR.rotation.x *= 0.9;
-      armL.userData.elbow.rotation.x *= 0.9;
-      armR.userData.elbow.rotation.x *= 0.9;
-      legL.rotation.x *= 0.9;
-      legR.rotation.x *= 0.9;
-      character.rotation.z *= 0.92;
-    }
+    // idle: breathing, slow weight shift, hands resting in pockets
+    const breathe = Math.sin(t * 1.5) * 0.012;
+    const shift = Math.sin(t * 0.5) * 0.03;
+    torso.scale.y = 1 + breathe * (1 - dance);
+    torso.rotation.z = shift * (1 - dance);
+
+    // dance oscillators
+    const swing = Math.sin(beat * Math.PI);
+    const canDance = dance > 0.01 && !reduced;
+    const d = canDance ? dance : 0;
+
+    // arms: blend pocket pose → dance pumps
+    armL.rotation.x = lerp(POCKET.shX, -0.7 + swing * 1.0, d);
+    armR.rotation.x = lerp(POCKET.shX, -0.7 - swing * 1.0, d);
+    armL.rotation.z = lerp(POCKET.shZL + breathe, 0.55 + Math.abs(swing) * 0.35, d);
+    armR.rotation.z = lerp(-POCKET.shZL - breathe, -0.55 - Math.abs(swing) * 0.35, d);
+    armL.userData.elbow.rotation.x = lerp(POCKET.elX, -1.2 + swing * 0.5, d);
+    armR.userData.elbow.rotation.x = lerp(POCKET.elX, -1.2 - swing * 0.5, d);
+
+    // body: bounce, twist, leg kicks on the beat
+    character.position.y = Math.abs(Math.sin(beat * Math.PI)) * 0.17 * d;
+    character.rotation.z = Math.sin(beat * Math.PI) * 0.06 * d;
+    torso.rotation.y = Math.sin(beat * Math.PI * 0.5) * 0.38 * d;
+    legL.rotation.x = swing * 0.28 * d;
+    legR.rotation.x = -swing * 0.28 * d;
+    if (canDance) head.rotation.x += Math.sin(beat * Math.PI * 2) * 0.08 * d;
 
     // blink
     nextBlink -= dt;
@@ -284,7 +313,6 @@ function init(stage) {
       if (p >= 1) { blinkT = -1; eyeL.scale.y = eyeR.scale.y = 1; }
     }
 
-    blob.scale.setScalar(1 - character.position.y * 0.35);
     renderer.render(scene, camera);
   });
 }

@@ -1,0 +1,8 @@
+---
+import Base from '../../layouts/Base.astro';
+import ContactPage from '../../components/ContactPage.astro';
+import t from '../../data/bn.json';
+---
+<Base lang="bn" title={`যোগাযোগ — ${t.meta.title}`} description={t.contactPage.lead} t={t}>
+  <ContactPage lang="bn" t={t} />
+</Base>

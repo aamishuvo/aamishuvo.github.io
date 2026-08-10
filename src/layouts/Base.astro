@@ -6,7 +6,7 @@ import '@fontsource/manrope/700';
 import '@fontsource/manrope/800';
 import '@fontsource/space-mono/400';
 import '../styles/global.css';
-import settings from '../data/settings.json';
+import Social from '../components/Social.astro';
 
 interface Props {
   lang: 'en' | 'bn';
@@ -16,9 +16,18 @@ interface Props {
   path?: string;
 }
 
-const { lang, title, description, t, path = '/' } = Astro.props;
+const { lang, title, description, t } = Astro.props;
+const base = lang === 'bn' ? '/bn' : '';
 const homeHref = lang === 'bn' ? '/bn/' : '/';
-const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
+
+const links = [
+  { href: `${homeHref}#work`, label: t.nav.work },
+  { href: `${homeHref}#board`, label: t.nav.board },
+  { href: `${homeHref}#diagnostic`, label: t.nav.diagnostic },
+  { href: `${base}/blog/`, label: t.nav.blog },
+  { href: `${base}/about/`, label: t.nav.about || 'About' },
+  { href: `${base}/contact/`, label: t.nav.contact }
+];
 ---
 <!doctype html>
 <html lang={lang}>
@@ -45,12 +54,8 @@ const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
   <header class="nav">
     <div class="shell">
       <a class="mark" href={homeHref} aria-label="Home">MI<span>·</span></a>
-      <nav aria-label="Primary">
-        <a href={homeHref + '#work'}>{t.nav.work}</a>
-        <a href={homeHref + '#board'}>{t.nav.board}</a>
-        <a href={homeHref + '#diagnostic'}>{t.nav.diagnostic}</a>
-        <a href={blogHref}>{t.nav.blog}</a>
-        <a href={homeHref + '#contact'}>{t.nav.contact}</a>
+      <nav aria-label="Primary" class="nav-links">
+        {links.map((l) => <a href={l.href}>{l.label}</a>)}
       </nav>
       <button class="zb-toggle" id="zbToggle" aria-pressed="false"
         data-hint-on={t.zb.hintOn} data-hint-off={t.zb.hintOff}
@@ -58,9 +63,20 @@ const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
         <span class="zb-word">{t.zb.label}</span><i></i>
       </button>
       <a class="lang-switch" href={t.langSwitch.href}>{t.langSwitch.label}</a>
+      <button class="burger" id="burger" aria-expanded="false"
+        aria-label={lang === 'bn' ? 'মেনু' : 'Menu'} aria-controls="mobileMenu">
+        <span></span><span></span>
+      </button>
     </div>
   </header>
   <div class="zb-hint" id="zbHint" role="status"></div>
+
+  <div class="mobile-menu" id="mobileMenu" hidden>
+    <nav aria-label={lang === 'bn' ? 'মোবাইল মেনু' : 'Mobile'}>
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+    <Social size="lg" showEmail={true} />
+  </div>
 
   <main id="main">
     <slot />
@@ -69,6 +85,7 @@ const blogHref = lang === 'bn' ? '/bn/blog/' : '/blog/';
   <footer class="site">
     <div class="shell">
       <span>{t.footer.left}</span>
+      <Social size="sm" showEmail={true} />
       <span>{t.footer.right}</span>
     </div>
   </footer>

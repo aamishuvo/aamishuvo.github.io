@@ -8,6 +8,7 @@
     "board": "Board",
     "diagnostic": "Diagnostic",
     "blog": "Blog",
+    "about": "About",
     "contact": "Contact"
   },
   "zb": {
@@ -39,7 +40,7 @@
     },
     "scroll": "SCROLL",
     "availability": {
-      "employed": "Full Time Employee @ Banglalink",
+      "employed": "Full-time at Banglalink",
       "available": "Open to work",
       "break": "On a break from corporate life"
     }
@@ -228,6 +229,62 @@
         "key": "https://www.linkedin.com/in/iamshuvo/"
       }
     ]
+  },
+  "about": {
+    "eyebrow": "About",
+    "title": "The person behind the programmes",
+    "lead": "I'm Mahmudul — a program manager who treats delivery as a discipline, not a personality trait. Ten years, three sectors, one recurring problem: a dozen teams each holding a piece of the truth, and nobody holding the whole picture.",
+    "sections": [
+      {
+        "h": "How I got here",
+        "body": "I studied Electrical & Electronic Engineering, which taught me something more useful in delivery than in circuit design: systems fail at the interfaces, not in the middle. Two components can each work perfectly and still bring the whole thing down at the point where they meet.\n\nThat is precisely where programmes fail too. Product signs off. IT signs off. Commercial signs off. Then launch week arrives and nobody owns the handover between them. My job, in every role I have held, has been to own those interfaces before they become incidents."
+      },
+      {
+        "h": "What I actually do",
+        "body": "I turn ambiguity into a dated, measurable plan, and then I hold the organisation to it — without pretending a bad week is a good one.\n\nIn practice that means RAID discipline that people actually maintain, gate criteria agreed before the gate rather than negotiated at it, UAT sign-off that means something, and executive reporting that leads with the decision needed instead of burying it on slide 34."
+      },
+      {
+        "h": "Where I have done it",
+        "body": "E-governance at Synesis IT, where platforms had to work for citizens with no fallback option. Logistics at Paperfly, where a process that fails in a remote thana fails in front of a customer at their doorstep. Telecom at Banglalink, where scale means a small design flaw multiplies across 64 districts before anyone files a ticket.\n\nDifferent industries, same craft."
+      }
+    ],
+    "principlesTitle": "Four things I believe",
+    "principles": [
+      { "title": "Bad news travels first", "body": "A programme is only as healthy as its willingness to report a bad week honestly. Permanently green status is not good news — it is missing information." },
+      { "title": "Measure what stakeholders feel", "body": "Volume is what your process shows you; time is what people experience. Count the days held, not the tickets closed." },
+      { "title": "Design the constraint in", "body": "Regulatory validation, field realities and vendor limits belong in the design on day one. Bolted on at the end, they become the reason you miss the date." },
+      { "title": "The ask goes on top", "body": "Executives need the decision first and the evidence second. If your recommendation is on slide 34, it is not a recommendation." }
+    ],
+    "nowTitle": "What I'm exploring now",
+    "nowBody": "Where artificial intelligence genuinely belongs in programme governance — not as a dashboard gimmick, but for the unglamorous work: surfacing risks buried in status reports, spotting where approvals silently stall, and drafting the executive summary nobody has time to write.",
+    "ctaTitle": "Working on something stuck?",
+    "ctaText": "That is usually where I am most useful.",
+    "ctaButton": "Get in touch"
+  },
+  "contactPage": {
+    "eyebrow": "Contact",
+    "title": "Let's talk about your programme",
+    "lead": "The fastest way to reach me is email. I read everything, and I reply to anything with a real question in it.",
+    "emailLabel": "Email",
+    "socialLabel": "Elsewhere",
+    "responseTitle": "Response time",
+    "responseBody": "Usually within two working days, from Dhaka (GMT+6).",
+    "bringTitle": "What's useful to include",
+    "bring": [
+      "What the programme is meant to deliver, and by when",
+      "Where it is stuck right now — honestly",
+      "Who has to say yes for it to move"
+    ],
+    "formTitle": "Or send it from here",
+    "fName": "Your name",
+    "fEmail": "Your email",
+    "fOrg": "Organization (optional)",
+    "fMessage": "What's on your mind",
+    "send": "Send message",
+    "sending": "Sending…",
+    "sentTitle": "Message sent.",
+    "sentBody": "Thank you — I'll get back to you shortly.",
+    "mailFallback": "Opening your email client…"
   },
   "footer": {
     "left": "Md. Mahmudul Islam ",

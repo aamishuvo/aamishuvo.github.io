@@ -1,0 +1,64 @@
+---
+import Social from './Social.astro';
+import settings from '../data/settings.json';
+
+interface Props { lang: 'en' | 'bn'; t: any; }
+const { lang, t } = Astro.props;
+const a = t.about;
+const contactHref = lang === 'bn' ? '/bn/contact/' : '/contact/';
+const avail = (settings as any).availability || 'employed';
+---
+<section class="page-head shell">
+  <div class="about-top">
+    <div>
+      <p class="eyebrow">{a.eyebrow}</p>
+      <h1 class="page-title">{a.title}</h1>
+      <p class="page-lead">{a.lead}</p>
+      {t.hero.availability && (
+        <div class={`avail ${avail}`} role="status">
+          <i></i><span>{t.hero.availability[avail]}</span>
+        </div>
+      )}
+    </div>
+    <figure class="about-portrait">
+      <img src="/assets/img/portrait.webp" width="760" height="1269"
+           alt={lang === 'bn' ? 'মো. মাহমুদুল ইসলাম' : 'Md. Mahmudul Islam'} loading="eager" />
+    </figure>
+  </div>
+</section>
+
+<section class="block shell about-body">
+  {a.sections.map((s: any) => (
+    <article class="about-sec reveal">
+      <h2>{s.h}</h2>
+      {String(s.body).split('\n\n').map((p: string) => <p>{p}</p>)}
+    </article>
+  ))}
+</section>
+
+<section class="block shell">
+  <h2 class="head">{a.principlesTitle}</h2>
+  <div class="principles">
+    {a.principles.map((p: any, i: number) => (
+      <div class="principle reveal">
+        <span class="principle-n">{String(i + 1).padStart(2, '0')}</span>
+        <h3>{p.title}</h3>
+        <p>{p.body}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<section class="block shell">
+  <div class="now-card reveal">
+    <p class="eyebrow">{a.nowTitle}</p>
+    <p class="now-body">{a.nowBody}</p>
+  </div>
+</section>
+
+<section class="block shell about-cta">
+  <h2 class="head">{a.ctaTitle}</h2>
+  <p class="page-lead">{a.ctaText}</p>
+  <a class="btn" href={contactHref}>{a.ctaButton} →</a>
+  <Social size="lg" showEmail={true} />
+</section>

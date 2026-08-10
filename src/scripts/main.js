@@ -38,6 +38,21 @@ const counter = new IntersectionObserver((entries) => {
 }, { threshold: 0.6 });
 document.querySelectorAll('.count').forEach((el) => counter.observe(el));
 
+// mobile menu
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobileMenu');
+if (burger && mobileMenu) {
+  const setOpen = (open) => {
+    burger.setAttribute('aria-expanded', String(open));
+    mobileMenu.hidden = !open;
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  burger.addEventListener('click', () => setOpen(burger.getAttribute('aria-expanded') !== 'true'));
+  mobileMenu.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+  matchMedia('(min-width: 861px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+}
+
 // work accordion
 document.querySelectorAll('.prog-bar').forEach((btn) => {
   btn.addEventListener('click', () => {

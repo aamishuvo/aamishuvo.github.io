@@ -4,5 +4,15 @@
   "leadEndpoint": "",
   "linkedin": "https://www.linkedin.com/in/iamshuvo/",
   "github": "https://github.com/aamishuvo",
+  "social": [
+    { "platform": "linkedin", "label": "LinkedIn", "url": "https://www.linkedin.com/in/iamshuvo/" },
+    { "platform": "github", "label": "GitHub", "url": "https://github.com/aamishuvo" },
+    { "platform": "facebook", "label": "Facebook", "url": "" },
+    { "platform": "x", "label": "X", "url": "" },
+    { "platform": "whatsapp", "label": "WhatsApp", "url": "" },
+    { "platform": "instagram", "label": "Instagram", "url": "" },
+    { "platform": "telegram", "label": "Telegram", "url": "" },
+    { "platform": "youtube", "label": "YouTube", "url": "" }
+  ],
   "cvUrl": ""
 }

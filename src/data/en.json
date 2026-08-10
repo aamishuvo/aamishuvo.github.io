@@ -21,7 +21,7 @@
     "href": "/bn/"
   },
   "hero": {
-    "eyebrow": "This is",
+    "eyebrow": "",
     "nameLines": [
       "MAHMUDUL",
       "ISLAM"
@@ -159,6 +159,18 @@
       }
     ]
   },
+  "education": {
+    "eyebrow": "Foundations",
+    "head": "Where the thinking came from",
+    "items": [
+      {
+        "credential": "B.Sc. in Electrical & Electronic Engineering",
+        "org": "Stamford University Bangladesh",
+        "period": "",
+        "note": "Engineering taught me that systems fail at the interfaces, not in the middle. Two components can each work perfectly and still bring the whole thing down where they meet — which is exactly how programmes fail, too."
+      }
+    ]
+  },
   "board": {
     "eyebrow": "The working board",
     "head": "How the sausage gets made",
@@ -232,8 +244,15 @@
   },
   "about": {
     "eyebrow": "About",
-    "title": "The person behind the programmes",
-    "lead": "I'm Mahmudul — a program manager who treats delivery as a discipline, not a personality trait. Ten years, three sectors, one recurring problem: a dozen teams each holding a piece of the truth, and nobody holding the whole picture.",
+    "name": "Md. Mahmudul Islam",
+    "role": "Program Management — Telecom & Digital Delivery",
+    "paragraphs": [
+      "I started out as an engineer. Today I deliver the programmes and the governance that carry them, because no plan survives an organization that cannot tell itself the truth.",
+      "Over ten years I have worked across telecom, logistics and e-governance in Bangladesh. I am currently Program Management Manager at Banglalink Digital Communications, after a path that ran through Paperfly and Synesis IT.",
+      "My work: making visible what the organization has stopped seeing. Silos, approvals that quietly stall, dashboards that stay green through a bad month. Then turning those findings into dated decisions — not slides."
+    ],
+    "readLabel": "Read: Count delay-days, not tickets",
+    "readHref": "/blog/delay-days-not-tickets/",
     "sections": [
       {
         "h": "How I got here",

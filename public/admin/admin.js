@@ -214,10 +214,51 @@
       lg.textContent = label(key);
       fs.append(lg);
       const renderItems = () => {
-        fs.querySelectorAll(':scope > .arr-item, :scope > .add-item').forEach((n) => n.remove());
+        fs.querySelectorAll(':scope > .arr-item, :scope > .add-item, :scope > .arr-hint').forEach((n) => n.remove());
+
+        if (value.length > 1) {
+          const hint = document.createElement('p');
+          hint.className = 'arr-hint';
+          hint.textContent = 'Drag ⠿ to reorder, or use ↑ ↓. The order here is the order on the site.';
+          fs.append(hint);
+        }
+
+        const move = (from, to) => {
+          if (to < 0 || to >= value.length) return;
+          value.splice(to, 0, value.splice(from, 1)[0]);
+          renderItems();
+        };
+
         value.forEach((item, i) => {
           const box = document.createElement('div');
           box.className = 'arr-item';
+          box.draggable = false;
+
+          const tools = document.createElement('div');
+          tools.className = 'arr-tools';
+
+          const grip = document.createElement('span');
+          grip.className = 'grip';
+          grip.textContent = '⠿';
+          grip.title = 'Drag to reorder';
+          // only start a drag from the handle, so text fields stay selectable
+          grip.addEventListener('mousedown', () => { box.draggable = true; });
+          grip.addEventListener('mouseup', () => { box.draggable = false; });
+
+          const up = document.createElement('button');
+          up.type = 'button'; up.className = 'ord'; up.textContent = '↑'; up.title = 'Move up';
+          up.disabled = i === 0;
+          up.addEventListener('click', () => move(i, i - 1));
+
+          const down = document.createElement('button');
+          down.type = 'button'; down.className = 'ord'; down.textContent = '↓'; down.title = 'Move down';
+          down.disabled = i === value.length - 1;
+          down.addEventListener('click', () => move(i, i + 1));
+
+          const pos = document.createElement('span');
+          pos.className = 'arr-pos';
+          pos.textContent = `${i + 1} / ${value.length}`;
+
           const rm = document.createElement('button');
           rm.className = 'rm';
           rm.type = 'button';
@@ -227,7 +268,33 @@
             value.splice(i, 1);
             renderItems();
           });
-          box.append(rm);
+
+          tools.append(grip, up, down, pos, rm);
+          box.append(tools);
+
+          box.addEventListener('dragstart', (e) => {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', String(i));
+            box.classList.add('dragging');
+          });
+          box.addEventListener('dragend', () => {
+            box.classList.remove('dragging');
+            box.draggable = false;
+            fs.querySelectorAll('.arr-item').forEach((n) => n.classList.remove('drop-target'));
+          });
+          box.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            box.classList.add('drop-target');
+          });
+          box.addEventListener('dragleave', () => box.classList.remove('drop-target'));
+          box.addEventListener('drop', (e) => {
+            e.preventDefault();
+            box.classList.remove('drop-target');
+            const from = Number(e.dataTransfer.getData('text/plain'));
+            if (!Number.isNaN(from) && from !== i) move(from, i);
+          });
+
           if (item !== null && typeof item === 'object') {
             for (const [k, v] of Object.entries(item)) renderNode(box, item, k, v);
           } else {
@@ -316,14 +383,90 @@
   function serializePost(fm, body) {
     const esc = (s) => `"${String(s).replace(/"/g, '\\"')}"`;
     const lines = ['---',
-      `title: ${esc(fm.title)}`,
-      `description: ${esc(fm.description)}`,
+      `title: ${esc(fm.title)}`];
+    if (fm.subtitle) lines.push(`subtitle: ${esc(fm.subtitle)}`);
+    lines.push(`description: ${esc(fm.description)}`);
+    if (fm.cover) lines.push(`cover: ${esc(fm.cover)}`);
+    lines.push(
       `date: ${fm.date}`,
       `lang: ${fm.lang}`,
       `tags: ${JSON.stringify(fm.tags || [])}`,
       `draft: ${fm.draft ? 'true' : 'false'}`,
-      '---', '', body.trim(), ''];
+      '---', '', body.trim(), '');
     return lines.join('\n');
+  }
+
+  /* Upload a File to public/assets/img and return its site path. */
+  async function uploadImage(fileObj) {
+    const buf = new Uint8Array(await fileObj.arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < buf.length; i += 0x8000)
+      bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+    const name = fileObj.name.toLowerCase().replace(/[^a-z0-9.-]+/g, '-');
+    const path = `${IMG_DIR}/${name}`;
+    let sha;
+    try { sha = (await gh(`${contentsUrl(path)}?ref=${encodeURIComponent(state.branch)}`)).sha; } catch { /* new file */ }
+    const body = { message: `admin: upload image ${name}`, content: btoa(bin), branch: state.branch };
+    if (sha) body.sha = sha;
+    await gh(contentsUrl(path), { method: 'PUT', body: JSON.stringify(body) });
+    return `/assets/img/${name}`;
+  }
+
+  /* Minimal Markdown → HTML, for the editor preview only. */
+  function mdPreview(md) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const inline = (s) => esc(s)
+      .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img alt="$1" src="$2">')
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    const out = [];
+    let inList = false, inQuote = false, inCode = false;
+    for (const raw of md.split('\n')) {
+      const line = raw.trimEnd();
+      if (/^```/.test(line)) {
+        out.push(inCode ? '</code></pre>' : '<pre><code>');
+        inCode = !inCode;
+        continue;
+      }
+      if (inCode) { out.push(esc(raw)); continue; }
+      const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+      const closeQuote = () => { if (inQuote) { out.push('</blockquote>'); inQuote = false; } };
+
+      if (/^#{1,6}\s/.test(line)) {
+        closeList(); closeQuote();
+        const level = line.match(/^#+/)[0].length;
+        out.push(`<h${level}>${inline(line.replace(/^#+\s*/, ''))}</h${level}>`);
+      } else if (/^[-*]\s+/.test(line)) {
+        closeQuote();
+        if (!inList) { out.push('<ul>'); inList = true; }
+        out.push(`<li>${inline(line.replace(/^[-*]\s+/, ''))}</li>`);
+      } else if (/^>\s?/.test(line)) {
+        closeList();
+        if (!inQuote) { out.push('<blockquote>'); inQuote = true; }
+        out.push(`<p>${inline(line.replace(/^>\s?/, ''))}</p>`);
+      } else if (!line.trim()) {
+        closeList(); closeQuote();
+      } else {
+        closeList(); closeQuote();
+        out.push(`<p>${inline(line)}</p>`);
+      }
+    }
+    if (inList) out.push('</ul>');
+    if (inQuote) out.push('</blockquote>');
+    if (inCode) out.push('</code></pre>');
+    return out.join('\n');
+  }
+
+  /* Wrap or insert markdown around the textarea selection. */
+  function surround(ta, before, after = '', placeholder = '') {
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const selected = ta.value.slice(start, end) || placeholder;
+    ta.setRangeText(before + selected + after, start, end, 'end');
+    ta.focus();
+    ta.dispatchEvent(new Event('input'));
   }
 
   async function renderBlog() {
@@ -368,7 +511,7 @@
 
   async function editPost(file) {
     panel.innerHTML = '';
-    let fm = { title: '', description: '', date: new Date().toISOString().slice(0, 10), lang: 'en', tags: [], draft: false };
+    let fm = { title: '', subtitle: '', description: '', cover: '', date: new Date().toISOString().slice(0, 10), lang: 'en', tags: [], draft: false };
     let body = '';
     let sha = null;
     let existingPath = null;
@@ -398,10 +541,11 @@
     const ed = document.createElement('div');
     ed.className = 'post-editor';
     ed.innerHTML = `
+      <label>Title<input id="pTitle" placeholder="The headline of the post"></label>
+      <label>Subtitle (optional — shown in the handwritten style)<input id="pSubtitle"></label>
       <div class="two-col">
-        <label>Title<input id="pTitle"></label>
         <label>Slug (filename, no .md)<input id="pSlug" ${file ? 'disabled' : ''}></label>
-        <label>Date (YYYY-MM-DD)<input id="pDate"></label>
+        <label>Date (YYYY-MM-DD)<input id="pDate" type="date"></label>
         <label>Language
           <select id="pLang" ${file ? 'disabled' : ''}>
             <option value="en">English</option>
@@ -409,21 +553,127 @@
           </select>
         </label>
         <label>Tags (comma-separated)<input id="pTags"></label>
-        <label class="check" style="align-self:center"><input type="checkbox" id="pDraft" style="width:auto"> Draft (hidden from site)</label>
       </div>
-      <label>Description<textarea id="pDesc"></textarea></label>
-      <label>Body (Markdown)<textarea id="pBody" class="body"></textarea></label>
+      <label>Description (shown on cards and in search results)<textarea id="pDesc"></textarea></label>
+      <label>Cover image
+        <div class="cover-row">
+          <input id="pCover" placeholder="/assets/img/cover.jpg">
+          <button type="button" class="ghost" id="pCoverBtn">Upload…</button>
+        </div>
+      </label>
+      <div id="pCoverPreview"></div>
+      <label class="check"><input type="checkbox" id="pDraft" style="width:auto"> Draft (hidden from the site)</label>
+
+      <div class="md-toolbar" id="mdToolbar">
+        <button type="button" data-md="h2" title="Heading">H2</button>
+        <button type="button" data-md="h3" title="Sub-heading">H3</button>
+        <button type="button" data-md="bold" title="Bold"><b>B</b></button>
+        <button type="button" data-md="italic" title="Italic"><i>I</i></button>
+        <button type="button" data-md="link" title="Link">🔗</button>
+        <button type="button" data-md="list" title="Bullet list">• List</button>
+        <button type="button" data-md="quote" title="Quote">❝</button>
+        <button type="button" data-md="code" title="Code">&lt;/&gt;</button>
+        <button type="button" data-md="hr" title="Divider">―</button>
+        <button type="button" data-md="image" title="Upload and insert an image">🖼 Image</button>
+        <button type="button" id="previewToggle" class="right">Preview</button>
+      </div>
+      <div class="editor-split" id="editorSplit">
+        <textarea id="pBody" class="body" placeholder="Write your post in Markdown. Drag an image straight into this box to upload it."></textarea>
+        <div class="md-preview" id="mdPreviewPane" hidden></div>
+      </div>
     `;
     panel.append(ed);
 
     $('#pTitle').value = fm.title;
+    $('#pSubtitle').value = fm.subtitle || '';
     $('#pSlug').value = file ? file.name.replace(/\.md$/, '') : '';
     $('#pDate').value = String(fm.date).slice(0, 10);
     $('#pLang').value = fm.lang;
     $('#pTags').value = (fm.tags || []).join(', ');
     $('#pDraft').checked = fm.draft === true || fm.draft === 'true';
     $('#pDesc').value = fm.description;
+    $('#pCover').value = fm.cover || '';
     $('#pBody').value = body;
+
+    const bodyTa = $('#pBody');
+    const previewPane = $('#mdPreviewPane');
+    const coverPreview = $('#pCoverPreview');
+
+    const drawCover = () => {
+      coverPreview.innerHTML = '';
+      const url = $('#pCover').value.trim();
+      if (!url) return;
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'cover-preview';
+      coverPreview.append(img);
+    };
+    $('#pCover').addEventListener('input', drawCover);
+    drawCover();
+
+    const filePicker = document.createElement('input');
+    filePicker.type = 'file';
+    filePicker.accept = 'image/*';
+    filePicker.hidden = true;
+    panel.append(filePicker);
+
+    $('#pCoverBtn').addEventListener('click', () => {
+      filePicker.onchange = async () => {
+        if (!filePicker.files[0]) return;
+        const url = await busy('Uploading cover', () => uploadImage(filePicker.files[0]));
+        $('#pCover').value = url;
+        drawCover();
+        filePicker.value = '';
+      };
+      filePicker.click();
+    });
+
+    // toolbar
+    $('#mdToolbar').addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-md]');
+      if (!btn) return;
+      const kind = btn.dataset.md;
+      if (kind === 'h2') surround(bodyTa, '\n## ', '\n', 'Heading');
+      else if (kind === 'h3') surround(bodyTa, '\n### ', '\n', 'Sub-heading');
+      else if (kind === 'bold') surround(bodyTa, '**', '**', 'bold text');
+      else if (kind === 'italic') surround(bodyTa, '*', '*', 'italic text');
+      else if (kind === 'link') surround(bodyTa, '[', '](https://)', 'link text');
+      else if (kind === 'list') surround(bodyTa, '\n- ', '\n', 'list item');
+      else if (kind === 'quote') surround(bodyTa, '\n> ', '\n', 'quoted line');
+      else if (kind === 'code') surround(bodyTa, '\n```\n', '\n```\n', 'code');
+      else if (kind === 'hr') surround(bodyTa, '\n\n---\n\n', '', '');
+      else if (kind === 'image') {
+        filePicker.onchange = async () => {
+          if (!filePicker.files[0]) return;
+          const url = await busy('Uploading image', () => uploadImage(filePicker.files[0]));
+          surround(bodyTa, `\n![](${url})\n`, '', '');
+          filePicker.value = '';
+        };
+        filePicker.click();
+      }
+    });
+
+    // drag an image straight into the body
+    bodyTa.addEventListener('dragover', (e) => { e.preventDefault(); bodyTa.classList.add('drag-over'); });
+    bodyTa.addEventListener('dragleave', () => bodyTa.classList.remove('drag-over'));
+    bodyTa.addEventListener('drop', async (e) => {
+      const f = e.dataTransfer.files[0];
+      if (!f || !f.type.startsWith('image/')) return;
+      e.preventDefault();
+      bodyTa.classList.remove('drag-over');
+      const url = await busy('Uploading image', () => uploadImage(f));
+      surround(bodyTa, `\n![](${url})\n`, '', '');
+    });
+
+    // preview
+    const refreshPreview = () => { previewPane.innerHTML = mdPreview(bodyTa.value); };
+    bodyTa.addEventListener('input', () => { if (!previewPane.hidden) refreshPreview(); });
+    $('#previewToggle').addEventListener('click', () => {
+      previewPane.hidden = !previewPane.hidden;
+      $('#editorSplit').classList.toggle('split', !previewPane.hidden);
+      $('#previewToggle').classList.toggle('on', !previewPane.hidden);
+      if (!previewPane.hidden) refreshPreview();
+    });
 
     const save = document.createElement('button');
     save.className = 'btn';
@@ -435,7 +685,9 @@
       if (!slug) throw new Error('A slug (or title) is required.');
       const text = serializePost({
         title: $('#pTitle').value,
+        subtitle: $('#pSubtitle').value,
         description: $('#pDesc').value,
+        cover: $('#pCover').value.trim(),
         date: $('#pDate').value,
         lang,
         tags: $('#pTags').value.split(',').map((s) => s.trim()).filter(Boolean),
@@ -501,19 +753,7 @@
     panel.append(grid);
 
     async function upload(fileObj) {
-      await busy('Uploading ' + fileObj.name, async () => {
-        const buf = new Uint8Array(await fileObj.arrayBuffer());
-        let bin = '';
-        for (let i = 0; i < buf.length; i += 0x8000)
-          bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-        const name = fileObj.name.toLowerCase().replace(/[^a-z0-9.-]+/g, '-');
-        const path = `${IMG_DIR}/${name}`;
-        let sha;
-        try { sha = (await gh(`${contentsUrl(path)}?ref=${encodeURIComponent(state.branch)}`)).sha; } catch { /* new file */ }
-        const body = { message: `admin: upload image ${name}`, content: btoa(bin), branch: state.branch };
-        if (sha) body.sha = sha;
-        await gh(contentsUrl(path), { method: 'PUT', body: JSON.stringify(body) });
-      });
+      await busy('Uploading ' + fileObj.name, () => uploadImage(fileObj));
       openTab('images');
     }
   }

@@ -188,6 +188,29 @@
     social: { platform: '', label: '', url: '' },
     metrics: { to: 0, suffix: '', label: '' }
   };
+  /* Entries saved before a field existed would otherwise never show that field
+     in the form. Walk the data and fill in any missing keys from the template. */
+  function normalize(node) {
+    if (!node || typeof node !== 'object') return;
+    for (const [key, val] of Object.entries(node)) {
+      if (Array.isArray(val)) {
+        const blank = BLANKS[key];
+        if (blank) {
+          for (const item of val) {
+            if (item && typeof item === 'object') {
+              for (const [k, v] of Object.entries(blank)) {
+                if (item[k] === undefined) item[k] = v;
+              }
+            }
+          }
+        }
+        val.forEach(normalize);
+      } else if (val && typeof val === 'object') {
+        normalize(val);
+      }
+    }
+  }
+
   // keys whose value is chosen from a list, so a cloned entry keeps its choice
   const SELECT_DEFAULTS = { action: 'dance', playlistMode: 'sequential', availability: 'employed', platform: '' };
 
@@ -491,6 +514,7 @@
     status('Loading ' + path + '…', 'busy');
     const { sha, text } = await readFile(path);
     const data = JSON.parse(text);
+    normalize(data);
     state.cache[path] = { sha, data };
     status('Ready.');
 

@@ -75,6 +75,10 @@ const links = [
     </div>
   </header>
   <div class="zb-hint" id="zbHint" role="status"></div>
+  <script type="application/json" id="playlistData" set:html={JSON.stringify({
+    tracks: ((settings as any).playlist || []).filter((x: any) => x && x.src),
+    mode: (settings as any).playlistMode || 'sequential'
+  })}></script>
 
   <div class="mobile-menu" id="mobileMenu" hidden>
     <nav aria-label={lang === 'bn' ? 'মোবাইল মেনু' : 'Mobile'}>

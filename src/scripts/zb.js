@@ -3,10 +3,21 @@
 // Copy variants live in data-zb-alt attributes; originals are stashed on first
 // toggle so the swap is reversible.
 
+import { initPlayer, hasPlaylist, start as playerStart, stop as playerStop, showUI } from './player.js';
+
 const root = document.documentElement;
 const toggle = document.getElementById('zbToggle');
 const hint = document.getElementById('zbHint');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// A playlist, when configured, replaces the generative synth.
+const playlistEl = document.getElementById('playlistData');
+if (playlistEl) {
+  try {
+    const cfg = JSON.parse(playlistEl.textContent);
+    initPlayer(cfg.tracks, cfg.mode);
+  } catch { /* fall back to the synth */ }
+}
 
 /* ── text scramble ─────────────────────────────── */
 const GLYPHS = '▪▫▚▞#%&$@!?/\\<>-_=+*';
@@ -184,6 +195,12 @@ function apply(on, { silent = false } = {}) {
   // theme flips mid-wipe so the sweep reveals the new mode
   setTimeout(flip, 240);
   showHint(on ? toggle.dataset.hintOn : toggle.dataset.hintOff);
+
+  if (hasPlaylist()) {
+    showUI(on);
+    if (on) playerStart(); else playerStop();
+    return;
+  }
   if (on) {
     if (!audio) audio = makeAudio();
     audio.start();
@@ -200,7 +217,7 @@ if ('zb' in root.dataset) apply(true, { silent: true });
 
 // Pause the groove when the tab is hidden.
 document.addEventListener('visibilitychange', () => {
-  if (!audio) return;
+  if (!audio || hasPlaylist()) return;
   if (document.hidden) audio.ctx.suspend();
   else if ('zb' in root.dataset) audio.ctx.resume();
 });

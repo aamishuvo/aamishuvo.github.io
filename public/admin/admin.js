@@ -16,6 +16,7 @@
   const BLOG_DIRS = { en: 'src/content/blog/en', bn: 'src/content/blog/bn' };
   const IMG_DIR = 'public/assets/img';
   const MODEL_DIR = 'public/assets/models';
+  const AUDIO_DIR = 'public/assets/audio';
 
   const $ = (sel, el = document) => el.querySelector(sel);
   const state = {
@@ -178,6 +179,18 @@
      Recursively renders a friendly form for any JSON structure.
      Inputs write straight back into the in-memory object; Save commits it. */
 
+  // Blank entries used when adding to an empty list.
+  const BLANKS = {
+    playlist: { title: '', artist: '', src: '', bpm: '', action: 'dance' },
+    certs: { logo: '', credential: '', org: '', period: '', url: '' },
+    items: { logo: '', credential: '', org: '', period: '', url: '' },
+    rows: { logo: '', period: '', org: '', role: '', focus: '', impact: '' },
+    social: { platform: '', label: '', url: '' },
+    metrics: { to: 0, suffix: '', label: '' }
+  };
+  // keys whose value is chosen from a list, so a cloned entry keeps its choice
+  const SELECT_DEFAULTS = { action: 'dance', playlistMode: 'sequential', availability: 'employed', platform: '' };
+
   // Friendlier names for keys whose raw form reads badly in the form.
   const LABELS = {
     items: 'Education entries',
@@ -200,7 +213,13 @@
     avatarImageCutout: 'Remove a plain white background from the avatar image',
     aboutPhoto: 'About page photo',
     leadEndpoint: 'Lead capture endpoint (optional)',
-    nameLines: 'Name (one line each)'
+    nameLines: 'Name (one line each)',
+    playlist: 'Music playlist',
+    playlistMode: 'Playback order',
+    src: 'Audio file',
+    bpm: 'Beats per minute (helps the dance stay in time — optional)',
+    action: 'What the avatar does during this song',
+    artist: 'Artist'
   };
 
   const label = (key) =>
@@ -213,8 +232,9 @@
     wrap.append(label(key));
     let input;
     // image/model fields get an upload button and a live thumbnail
-    if (typeof value === 'string' && /^(logo|cover|photo|image|icon|avatarModel)$|Photo$|Image$|Logo$|Model$/i.test(String(key))) {
+    if (typeof value === 'string' && /^(logo|cover|photo|image|icon|avatarModel|src|audio|track)$|Photo$|Image$|Logo$|Model$/i.test(String(key))) {
       const isModelField = /model/i.test(String(key));
+      const isAudioField = /^(src|audio|track)$/i.test(String(key));
       const row = document.createElement('div');
       row.className = 'img-field';
 
@@ -223,12 +243,14 @@
 
       input = document.createElement('input');
       input.value = value;
-      input.placeholder = isModelField ? '/assets/models/avatar.glb' : '/assets/img/logo.png';
+      input.placeholder = isModelField ? '/assets/models/avatar.glb'
+        : isAudioField ? '/assets/audio/song.mp3' : '/assets/img/logo.png';
 
       const drawThumb = () => {
         thumb.innerHTML = '';
         if (!input.value.trim()) { thumb.textContent = '—'; return; }
         if (isModelField) { thumb.textContent = '3D'; return; }
+        if (isAudioField) { thumb.textContent = '♪'; return; }
         const img = document.createElement('img');
         img.src = input.value.trim();
         img.alt = '';
@@ -243,10 +265,11 @@
       pick.addEventListener('click', () => {
         const fp = document.createElement('input');
         fp.type = 'file';
-        fp.accept = isModelField ? '.glb,.gltf,model/gltf-binary' : 'image/*';
+        fp.accept = isModelField ? '.glb,.gltf,model/gltf-binary' : isAudioField ? 'audio/*' : 'image/*';
         fp.onchange = async () => {
           if (!fp.files[0]) return;
-          const url = await busy(isModelField ? 'Uploading 3D model' : 'Uploading image', () => uploadImage(fp.files[0]));
+          const label = isModelField ? 'Uploading 3D model' : isAudioField ? 'Uploading song' : 'Uploading image';
+          const url = await busy(label, () => uploadImage(fp.files[0]));
           input.value = url;
           obj[key] = url;
           drawThumb();
@@ -263,6 +286,32 @@
       drawThumb();
       row.append(thumb, input, pick, clear);
       wrap.append(row);
+      return wrap;
+    }
+
+    const SELECTS = {
+      action: [
+        ['dance', '💃 Dance — beat-synced steps (default)'],
+        ['guitar', '🎸 Sit on a stool and play guitar'],
+        ['sad', '😢 Face the wall and cry'],
+        ['sway', '🌊 Gentle sway']
+      ],
+      playlistMode: [
+        ['sequential', 'Play in order, then loop'],
+        ['random', 'Shuffle']
+      ]
+    };
+    if (SELECTS[key] && typeof value === 'string') {
+      input = document.createElement('select');
+      for (const [val, text] of SELECTS[key]) {
+        const o = document.createElement('option');
+        o.value = val; o.textContent = text;
+        input.append(o);
+      }
+      input.value = value || SELECTS[key][0][0];
+      obj[key] = input.value;
+      input.addEventListener('change', () => { obj[key] = input.value; });
+      wrap.append(input);
       return wrap;
     }
 
@@ -402,12 +451,21 @@
         const add = document.createElement('button');
         add.className = 'add-item';
         add.type = 'button';
-        add.textContent = '+ add item';
+        add.textContent = '+ add ' + (BLANKS[key] ? label(key).toLowerCase().replace(/s$/, '') : 'item');
         add.addEventListener('click', () => {
           const template = value[value.length - 1];
-          value.push(template !== null && typeof template === 'object'
-            ? JSON.parse(JSON.stringify(template))
-            : (typeof template === 'number' ? 0 : ''));
+          if (template !== null && typeof template === 'object') {
+            // clone the last entry, then blank the fields that must be unique
+            const copy = JSON.parse(JSON.stringify(template));
+            for (const k of Object.keys(copy)) {
+              if (typeof copy[k] === 'string' && !(k in (SELECT_DEFAULTS || {}))) copy[k] = '';
+            }
+            value.push(copy);
+          } else if (BLANKS[key]) {
+            value.push(JSON.parse(JSON.stringify(BLANKS[key])));
+          } else {
+            value.push(typeof template === 'number' ? 0 : '');
+          }
           renderItems();
         });
         fs.append(add);
@@ -588,14 +646,16 @@
       bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
     const name = fileObj.name.toLowerCase().replace(/[^a-z0-9.-]+/g, '-');
     const isModel = /\.(glb|gltf)$/.test(name);
-    const dir = isModel ? MODEL_DIR : IMG_DIR;
+    const isAudio = /\.(mp3|m4a|aac|ogg|oga|wav|flac)$/.test(name);
+    const dir = isModel ? MODEL_DIR : isAudio ? AUDIO_DIR : IMG_DIR;
     const path = `${dir}/${name}`;
     let sha;
     try { sha = (await gh(`${contentsUrl(path)}?ref=${encodeURIComponent(state.branch)}`)).sha; } catch { /* new file */ }
-    const body = { message: `admin: upload ${isModel ? 'model' : 'image'} ${name}`, content: btoa(bin), branch: state.branch };
+    const kind = isModel ? 'model' : isAudio ? 'audio' : 'image';
+    const body = { message: `admin: upload ${kind} ${name}`, content: btoa(bin), branch: state.branch };
     if (sha) body.sha = sha;
     await gh(contentsUrl(path), { method: 'PUT', body: JSON.stringify(body) });
-    return `/assets/${isModel ? 'models' : 'img'}/${name}`;
+    return `/assets/${isModel ? 'models' : isAudio ? 'audio' : 'img'}/${name}`;
   }
 
   /* Minimal Markdown → HTML, for the editor preview only. */

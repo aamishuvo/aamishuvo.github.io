@@ -55,23 +55,23 @@
         "logo": "/assets/img/image.png",
         "period": "2023 — pres.",
         "org": "Banglalink (VEON)",
-        "role": "Program Management Manager",
-        "focus": "Delivery governance for nationwide digital platforms. I run the machinery between product, IT, commercial and field operations — gate criteria agreed before the gate, UAT discipline, and ExCo reporting that leads with the decision needed.",
+        "role": "Program Management Manager, Business Strategy and PMO",
+        "focus": "Delivery governance for nationwide digital platforms. I run the machinery between product, IT, commercial and field operations gate criteria agreed before the gate, UAT discipline, and ExCo reporting that leads with the decision needed.",
         "impact": "D2D nationwide launch"
       },
       {
         "logo": "/assets/img/images.png",
-        "period": "2016 — 2019",
+        "period": "2021-2023",
         "org": "Paperfly",
-        "role": "Project Management",
+        "role": "Manager, Business Requirement Management",
         "focus": "Scaling e-commerce logistics delivery across the country — building the operational processes that let a parcel reach any thana, and the reporting that told the truth about where it didn't.",
-        "impact": "Nationwide logistics coverage"
+        "impact": "Nationwide logistics coverage, Paperfly Go, Papaerfly Wings, Put-to-Light"
       },
       {
         "logo": "/assets/img/synesis-it-limited-logo.jpg",
-        "period": "2014 — 2016",
+        "period": "2017  -2021",
         "org": "Synesis IT",
-        "role": "Project Delivery",
+        "role": "Assistant Manager, e-Governance",
         "focus": "E-governance platforms under the Digital Bangladesh programme — including delivery work on EkPay, the centralized citizen-to-government payment platform connecting banks, agents and service providers.",
         "impact": "EkPay P2G platform"
       }
@@ -180,23 +180,30 @@
         "org": "Govt. Azizul Haque College Bogra",
         "period": "",
         "url": ""
+      },
+      {
+        "logo": "/assets/img/bc7a6ef7d02e42b9bcf9e0f0c6ceef0b.png",
+        "credential": "Secondary School Certification",
+        "org": "Bogra Zilla School",
+        "period": "",
+        "url": ""
       }
     ],
     "certTitle": "Certifications",
     "certs": [
       {
-        "logo": "",
-        "credential": "Google Project Management Professional Certificate",
+        "logo": "/assets/img/image-1-.png",
+        "credential": "Google Project Management Certificate",
         "org": "Google · Coursera",
-        "period": "",
-        "url": ""
+        "period": "March 2023",
+        "url": "https://www.coursera.org/account/accomplishments/specialization/certificate/A5ARSJC2WEHU"
       },
       {
-        "logo": "",
-        "credential": "HackerOne Certification",
-        "org": "HackerOne",
-        "period": "",
-        "url": ""
+        "logo": "/assets/img/hackerrank-developer-skills-platform.png",
+        "credential": "SQL (Intermediate)",
+        "org": "HackerRank",
+        "period": "2023",
+        "url": "https://www.hackerrank.com/certificates/3c5f54f5d1b0"
       }
     ]
   },
@@ -323,7 +330,7 @@
   },
   "contactPage": {
     "eyebrow": "Contact",
-    "title": "Let's talk about your programme",
+    "title": "Let's talk about your projects",
     "lead": "The fastest way to reach me is email. I read everything, and I reply to anything with a real question in it.",
     "emailLabel": "Email",
     "socialLabel": "Elsewhere",
@@ -331,8 +338,8 @@
     "responseBody": "Usually within two working days, from Dhaka (GMT+6).",
     "bringTitle": "What's useful to include",
     "bring": [
-      "What the programme is meant to deliver, and by when",
-      "Where it is stuck right now — honestly",
+      "What the project is meant to deliver, and by when",
+      "Where it is stuck right now honestly",
       "Who has to say yes for it to move"
     ],
     "formTitle": "Or send it from here",
@@ -343,7 +350,7 @@
     "send": "Send message",
     "sending": "Sending…",
     "sentTitle": "Message sent.",
-    "sentBody": "Thank you — I'll get back to you shortly.",
+    "sentBody": "Thank you. I'll get back to you shortly.",
     "mailFallback": "Opening your email client…"
   },
   "footer": {

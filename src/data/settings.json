@@ -78,6 +78,13 @@
       "src": "/assets/audio/ayub-bachchu---rupali-guitar-music.com.bd-.mp3",
       "bpm": "",
       "action": "guitar"
+    },
+    {
+      "title": "Bondho Janala",
+      "artist": "Shironamhin",
+      "src": "/assets/audio/01---shironamhin---bondho-janala-music.com.bd-.mp3",
+      "bpm": "",
+      "action": "dance"
     }
   ]
 }

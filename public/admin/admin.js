@@ -181,7 +181,7 @@
 
   // Blank entries used when adding to an empty list.
   const BLANKS = {
-    playlist: { title: '', artist: '', src: '', bpm: '', action: 'dance' },
+    playlist: { title: '', artist: '', src: '', start: '', end: '', bpm: '', action: 'dance' },
     certs: { logo: '', credential: '', org: '', period: '', url: '' },
     items: { logo: '', credential: '', org: '', period: '', url: '' },
     rows: { logo: '', period: '', org: '', role: '', focus: '', impact: '' },
@@ -215,6 +215,8 @@
     leadEndpoint: 'Lead capture endpoint (optional)',
     nameLines: 'Name (one line each)',
     playlist: 'Music playlist',
+    start: 'Start at (M:SS — skips silence at the beginning)',
+    end: 'End at (M:SS — leave blank to play to the end)',
     playlistMode: 'Playback order',
     src: 'Audio file',
     bpm: 'Beats per minute (helps the dance stay in time — optional)',

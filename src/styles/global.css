@@ -876,6 +876,15 @@ body::after {
 }
 @media (max-width: 620px) {
   .zb-toggle span.zb-word { display: none; }
+  /* the scroll cue collides with the transport on a phone, and touch users
+     already know to scroll */
+  .cue { display: none; }
+  /* keep the controls under the right thumb rather than the left */
+  .player {
+    left: auto; right: clamp(12px, 4vw, 48px);
+    bottom: 14px; padding: .35rem .45rem;
+  }
+  .player-meta { max-width: 40vw; padding-inline: .4rem .5rem; }
   .board { min-height: 420px; }
   .postit { width: 128px; font-size: .68rem; }
   .diag-actions .btn { width: 100%; justify-content: center; }

@@ -214,6 +214,7 @@ function init(stage) {
       elbow.add(fore, cuff, hand);
       sh.add(cap0, upper, elbow);
       sh.userData.elbow = elbow;
+      sh.userData.hand = hand;
       return sh;
     };
     const armL = mkArm(-1), armR = mkArm(1);
@@ -592,7 +593,8 @@ function init(stage) {
 
     function poseDance(P, c) {
       c.amp = 0.7 + c.energy * 0.9 + c.pulse * 0.3;
-      STEPS[c.step % STEPS.length](P, c);
+      const step = STEPS[c.step] || STEPS[0];
+      step(P, c);
     }
 
     function poseSway(P, c) {
@@ -610,15 +612,18 @@ function init(stage) {
     function poseGuitar(P, c) {
       const strum = Math.sin(c.beat * Math.PI * 2);
       P.torsoLift = -0.42;               // sit down onto the stool
-      P.torsoX = -0.08;
-      P.torsoY = 0.16;
+      P.torsoX = -0.06;
+      P.torsoY = 0.1;
       P.legLX = -1.35; P.legRX = -1.15;  // thighs forward
       P.kneeL = 1.3; P.kneeR = 1.15;     // shins down
-      P.shLX = -0.75; P.shLZ = 0.85;     // fretting hand out along the neck
-      P.elLX = -1.35;
-      P.shRX = -0.5 + strum * 0.16; P.shRZ = -0.32;
-      P.elRX = -1.15 - strum * 0.2;      // strumming wrist
-      P.headX = 0.12; P.headY = -0.32;   // looking down at the fretboard
+      // fretting arm reaches out and away from the body, so the neck points
+      // off to his left rather than across his face
+      P.shLX = -0.88; P.shLZ = -0.34;
+      P.elLX = -0.72;
+      // strumming arm stays close in, hand over the lap where the body sits
+      P.shRX = -0.34 + strum * 0.1; P.shRZ = 0.2;
+      P.elRX = -1.28 - strum * 0.14;
+      P.headX = 0.16; P.headY = -0.22;   // looking down at the fretboard
       P.rootY = 0;
     }
 
@@ -676,15 +681,20 @@ function init(stage) {
       const strings = new THREE.Mesh(new THREE.BoxGeometry(0.055, 1.15, 0.006), metal);
       strings.position.set(0, 0.42, 0.055);
       guitar.add(bodyG, waist, hole, neck, headstock, strings);
-      // held across the body, neck up to the left
-      guitar.position.set(-0.02, 1.12, 0.34);
-      guitar.rotation.set(0.22, 0.1, 0.62);
+      // anchors in guitar-local space: where each hand belongs
+      const neckGrip = new THREE.Vector3(0, 0.66, 0.04);
+      const strumPoint = new THREE.Vector3(0, 0.02, 0.1);
 
-      props = { stool, guitar };
+      props = { stool, guitar, neckGrip, strumPoint, dir: new THREE.Vector3(-0.5, 0.85, 0) };
       subject.root.add(stool, guitar);
     }
 
-    function setProps(action, d) {
+    // scratch vectors, reused each frame
+    const _lh = new THREE.Vector3(), _rh = new THREE.Vector3();
+    const _y = new THREE.Vector3(), _x = new THREE.Vector3(), _z = new THREE.Vector3();
+    const _m = new THREE.Matrix4();
+
+    function setProps(action, d, parts, dt) {
       const wantGuitar = action === 'guitar' && d > 0.05;
       if (!props) {
         if (!wantGuitar) return;
@@ -692,6 +702,44 @@ function init(stage) {
       }
       props.stool.visible = wantGuitar;
       props.guitar.visible = wantGuitar;
+      if (!wantGuitar) return;
+
+      // Place the guitar from the hands rather than at fixed coordinates: the
+      // neck sits in the fretting hand and the body points at the strumming one,
+      // so the instrument and the arms can never disagree.
+      parts.armL.userData.hand.getWorldPosition(_lh);
+      parts.armR.userData.hand.getWorldPosition(_rh);
+      subject.root.worldToLocal(_lh);
+      subject.root.worldToLocal(_rh);
+
+      _y.copy(_lh).sub(_rh);
+      const span = _y.length();
+      if (span < 1e-3) return;
+      _y.multiplyScalar(1 / span);
+
+      // size the instrument to the actual distance between the hands, so the
+      // neck meets the fretting hand and the body meets the strumming one
+      // whatever pose the arms are in
+      const anchorSpan = props.neckGrip.distanceTo(props.strumPoint);
+      const want = clamp(span / anchorSpan, 0.72, 1.15);
+      props.scale = lerp(props.scale === undefined ? want : props.scale, want, Math.min(1, dt * 5));
+      props.guitar.scale.setScalar(props.scale);
+      // smooth it so the strumming hand does not wag the whole guitar
+      props.dir.lerp(_y, Math.min(1, dt * 6)).normalize();
+      _y.copy(props.dir);
+
+      // face the guitar outward: build an orthonormal basis around the neck axis
+      _z.set(0, 0, 1).sub(_y.clone().multiplyScalar(_y.z));
+      if (_z.lengthSq() < 1e-4) _z.set(1, 0, 0);
+      _z.normalize();
+      _x.crossVectors(_y, _z).normalize();
+      _z.crossVectors(_x, _y).normalize();
+      _m.makeBasis(_x, _y, _z);
+      props.guitar.quaternion.setFromRotationMatrix(_m);
+
+      // anchor the neck grip in the fretting hand
+      const grip = props.neckGrip.clone().multiplyScalar(props.scale).applyQuaternion(props.guitar.quaternion);
+      props.guitar.position.copy(_lh).sub(grip);
     }
 
     // morph-target indices for blink / smile, when the model provides them
@@ -733,7 +781,9 @@ function init(stage) {
       ctx.pulse = live ? player.pulse : 0;
       ctx.d = d;
       // change step every four bars, and on every track change
-      ctx.step = (Math.floor(ctx.bar / 4) + stepOffset) % 5;
+      // guard against a negative or non-finite bar count from a seeking track
+      const barSafe = Number.isFinite(ctx.bar) ? Math.max(0, ctx.bar) : 0;
+      ctx.step = ((Math.floor(barSafe / 4) + stepOffset) % STEPS.length + STEPS.length) % STEPS.length;
 
       if (coarse && !touchDragging) {
         target.x += ((Math.sin(t * 0.42) * 0.75) - target.x) * Math.min(1, dt * 0.9);
@@ -790,7 +840,7 @@ function init(stage) {
           P.shLZ = 0.1 + breathe; P.shRZ = -0.1 - breathe;
         }
 
-        setProps(actionNow(), d);
+        setProps(actionNow(), d, subject.parts, dt);
 
         const k = Math.min(1, dt * (12 + 10 * energyNow()));
         head.rotation.x += (P.headX - head.rotation.x) * Math.min(1, dt * 6);

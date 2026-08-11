@@ -71,6 +71,13 @@
       "src": "/assets/audio/04.-warfaze---purnota-music.com.bd-.mp3",
       "bpm": "",
       "action": "sway"
+    },
+    {
+      "title": "Rupali Guitar",
+      "artist": "Ayub Bachchu",
+      "src": "/assets/audio/ayub-bachchu---rupali-guitar-music.com.bd-.mp3",
+      "bpm": "",
+      "action": "guitar"
     }
   ]
 }

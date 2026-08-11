@@ -25,6 +25,7 @@ const homeHref = lang === 'bn' ? '/bn/' : '/';
 
 const s: any = settings;
 const links = [
+  { href: homeHref, label: t.nav.home || 'Home' },
   { href: `${homeHref}#track`, label: t.nav.work },
   ...(s.navShowBoard ? [{ href: `${homeHref}#board`, label: t.nav.board }] : []),
   ...(s.navShowDiagnostic ? [{ href: `${homeHref}#diagnostic`, label: t.nav.diagnostic }] : []),

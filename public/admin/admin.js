@@ -149,12 +149,28 @@
     openTab(btn.dataset.tab);
   });
 
+  /* ── the top-bar Save button always drives whatever editor is open ── */
+  const saveBtn = $('#saveBtn');
+  function setSaver(fn) {
+    state.saver = fn;
+    saveBtn.disabled = !fn;
+  }
+  saveBtn.addEventListener('click', () => { if (state.saver) state.saver(); });
+  addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      if (state.saver) state.saver();
+    }
+  });
+
   const panel = $('#panel');
   function openTab(tab) {
     state.tab = tab;
     panel.innerHTML = '';
+    setSaver(null);
     if (tab === 'blog') renderBlog();
     else if (tab === 'images') renderImages();
+    else if (tab === 'sections') renderSections();
     else renderJsonEditor(tab);
   }
 
@@ -420,25 +436,112 @@
 
     const head = document.createElement('div');
     head.className = 'editor-head';
-    head.innerHTML = `<h2>${title}</h2>`;
-    const save = document.createElement('button');
-    save.className = 'btn';
-    save.textContent = 'Save & publish';
-    save.addEventListener('click', () => busy('Saving', async () => {
-      save.disabled = true;
+    head.innerHTML = `<h2>${title}</h2><span class="save-hint">Changes save from the button in the top bar (Ctrl/⌘+S)</span>`;
+    panel.append(head);
+
+    setSaver(() => busy('Saving', async () => {
+      saveBtn.disabled = true;
       try {
         const newSha = await writeFile(path, JSON.stringify(data, null, 2) + '\n', `admin: update ${path}`, state.cache[path].sha);
         state.cache[path].sha = newSha;
       } finally {
-        save.disabled = false;
+        saveBtn.disabled = false;
       }
     }));
-    head.append(save);
-    panel.append(head);
 
     const form = document.createElement('div');
     for (const [k, v] of Object.entries(data)) renderNode(form, data, k, v);
     panel.append(form);
+  }
+
+  /* ══════════════ sections: show / hide ══════════════ */
+
+  // [key, name, description] — page sections first, then navigation entries
+  const SECTION_LIST = [
+    ['showTrack', 'Executive track record', 'The career table right under the hero.'],
+    ['showMetrics', 'Key figures', 'The row of animated numbers.'],
+    ['showProjects', 'Selected projects', 'The expandable list of projects you shipped.'],
+    ['showEducation', 'Education & certifications', 'The two-column Foundations block.'],
+    ['showBoard', 'Post-it board', 'The draggable notes board.'],
+    ['showDiagnostic', 'Strategic diagnostic', 'The three-question quiz with the voice read-out.'],
+    ['showMethod', 'Method', 'The three how-I-work cards.'],
+    ['showBlogOnHome', 'Blog teasers on the homepage', 'Latest two posts near the bottom of the homepage. The Blog page itself is unaffected.']
+  ];
+  const NAV_LIST = [
+    ['navShowBoard', 'Board link in the navigation bar', ''],
+    ['navShowDiagnostic', 'Diagnostic link in the navigation bar', '']
+  ];
+
+  function toggleRow(obj, key, name, desc) {
+    const row = document.createElement('label');
+    row.className = 'toggle-row';
+
+    const text = document.createElement('span');
+    text.className = 'toggle-text';
+    text.innerHTML = `<b>${name}</b>${desc ? `<em>${desc}</em>` : ''}`;
+
+    const sw = document.createElement('span');
+    sw.className = 'switch';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = obj[key] !== false;
+    const knob = document.createElement('i');
+    sw.append(input, knob);
+
+    const badge = document.createElement('span');
+    badge.className = 'toggle-badge';
+
+    const paint = () => {
+      row.classList.toggle('on', input.checked);
+      badge.textContent = input.checked ? 'Visible' : 'Hidden';
+    };
+
+    input.addEventListener('change', () => { obj[key] = input.checked; paint(); });
+    paint();
+
+    row.append(text, badge, sw);
+    return row;
+  }
+
+  async function renderSections() {
+    const path = FILES.settings.path;
+    status('Loading ' + path + '…', 'busy');
+    const { sha, text } = await readFile(path);
+    const data = JSON.parse(text);
+    if (!data.sections) data.sections = {};
+    state.cache[path] = { sha, data };
+    status('Ready.');
+
+    const head = document.createElement('div');
+    head.className = 'editor-head';
+    head.innerHTML = '<h2>Sections</h2><span class="save-hint">Turn a section off to hide it from the site. Nothing is deleted — its content stays and comes back when you turn it on.</span>';
+    panel.append(head);
+
+    const fsPage = document.createElement('fieldset');
+    fsPage.innerHTML = '<legend>Homepage sections</legend>';
+    for (const [key, name, desc] of SECTION_LIST) {
+      if (data.sections[key] === undefined) data.sections[key] = true;
+      fsPage.append(toggleRow(data.sections, key, name, desc));
+    }
+    panel.append(fsPage);
+
+    const fsNav = document.createElement('fieldset');
+    fsNav.innerHTML = '<legend>Navigation</legend>';
+    for (const [key, name, desc] of NAV_LIST) {
+      if (data[key] === undefined) data[key] = false;
+      fsNav.append(toggleRow(data, key, name, desc));
+    }
+    panel.append(fsNav);
+
+    setSaver(() => busy('Saving', async () => {
+      saveBtn.disabled = true;
+      try {
+        const newSha = await writeFile(path, JSON.stringify(data, null, 2) + '\n', 'admin: update section visibility', state.cache[path].sha);
+        state.cache[path].sha = newSha;
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }));
   }
 
   /* ══════════════ blog editor ══════════════ */
@@ -758,10 +861,7 @@
       if (!previewPane.hidden) refreshPreview();
     });
 
-    const save = document.createElement('button');
-    save.className = 'btn';
-    save.textContent = 'Save & publish';
-    save.addEventListener('click', () => busy('Saving post', async () => {
+    setSaver(() => busy('Saving post', async () => {
       const lang = $('#pLang').value;
       const slug = ($('#pSlug').value || $('#pTitle').value)
         .toLowerCase().trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');
@@ -781,7 +881,6 @@
       sha = newSha;
       existingPath = path;
     }));
-    panel.append(save);
   }
 
   /* ══════════════ images ══════════════ */

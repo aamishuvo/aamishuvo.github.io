@@ -37,6 +37,8 @@ label > input, label > textarea { margin-top: .3rem; }
 
 /* login */
 .login { display: grid; place-items: center; min-height: 100vh; padding: 1rem; }
+/* an author display rule beats the UA [hidden] rule, so restate it explicitly */
+.login[hidden], .app[hidden] { display: none; }
 .login-card {
   width: min(430px, 100%); background: var(--panel);
   border: 1px solid var(--line); border-radius: 16px; padding: 2rem;
@@ -113,6 +115,46 @@ fieldset > legend {
 .arr-pos { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
 .arr-item .rm { margin-left: auto; color: var(--muted); font-size: .75rem; }
 .arr-item .rm:hover { color: #ff7b6b; }
+
+/* top-bar save */
+.btn.save-top { padding: .45em 1.1em; font-size: .85rem; }
+.btn.save-top:disabled { opacity: .35; cursor: default; }
+.save-hint { font-size: .78rem; color: var(--muted); max-width: 52ch; }
+
+/* section toggles */
+.toggle-row {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--panel); border: 1px solid transparent;
+  border-radius: 10px; padding: .85rem 1rem;
+  margin-bottom: .6rem; cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.toggle-row:hover { border-color: var(--line); }
+.toggle-text { flex: 1; display: grid; gap: .15rem; }
+.toggle-text b { font-size: .95rem; color: var(--ink); font-weight: 600; }
+.toggle-text em { font-style: normal; font-size: .78rem; color: var(--muted); }
+.toggle-badge {
+  font-family: var(--mono); font-size: .65rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 99px; padding: .25em .8em;
+  white-space: nowrap;
+}
+.toggle-row.on .toggle-badge { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.switch { position: relative; width: 46px; height: 26px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.switch i {
+  position: absolute; inset: 0; border-radius: 99px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  transition: background .25s, border-color .25s;
+  pointer-events: none;
+}
+.switch i::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--muted); transition: transform .25s, background .25s;
+}
+.toggle-row.on .switch i { background: color-mix(in srgb, var(--ok) 25%, transparent); border-color: var(--ok); }
+.toggle-row.on .switch i::after { transform: translateX(20px); background: var(--ok); }
 
 /* image field with upload */
 .img-field { display: flex; align-items: center; gap: .5rem; margin-top: .3rem; }

@@ -795,6 +795,38 @@ html[lang="bn"] .about-role { font-family: var(--body); font-style: italic; font
 .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
 .reveal.in { opacity: 1; transform: none; }
 
+/* ── music transport ──────────────────────────── */
+.player {
+  position: fixed; left: clamp(12px, 4vw, 48px); bottom: 18px; z-index: 62;
+  display: flex; align-items: center; gap: .45rem;
+  background: color-mix(in srgb, var(--bg-raised) 92%, transparent);
+  border: 1px solid var(--line); border-radius: 99px;
+  padding: .4rem .5rem .4rem .45rem;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+  max-width: min(360px, calc(100vw - 2 * clamp(12px, 4vw, 48px)));
+}
+.player[hidden] { display: none; }
+.player-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center; font-size: .82rem;
+  color: var(--ink-soft); border: 1px solid transparent;
+  transition: color .2s, background .2s, border-color .2s;
+}
+.player-btn:hover { color: var(--accent); border-color: var(--accent); }
+.player-meta {
+  display: grid; gap: 1px; padding-inline: .5rem .7rem; min-width: 0;
+}
+.player-meta b {
+  font-size: .78rem; font-weight: 700; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.player-meta em {
+  font-family: var(--mono); font-style: normal; font-size: .62rem;
+  color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.player.is-playing .play { color: var(--accent); }
+
 /* ── mode-switch wipe ─────────────────────────── */
 .zb-wipe {
   position: fixed; inset: 0; z-index: 90;

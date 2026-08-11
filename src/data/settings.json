@@ -62,5 +62,7 @@
       "url": ""
     }
   ],
-  "cvUrl": ""
+  "cvUrl": "",
+  "playlistMode": "sequential",
+  "playlist": []
 }

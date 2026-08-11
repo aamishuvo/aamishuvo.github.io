@@ -14,6 +14,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { player, hasPlaylist, currentAction, sample as samplePlayer } from './player.js';
 
 const stage = document.getElementById('stage');
 if (stage) init(stage);
@@ -502,6 +503,197 @@ function init(stage) {
     let elapsed = 0;
     let nextBlink = 2, blinkT = -1;
 
+    /* ── beat context ──
+       Driven by the playlist when one is playing, otherwise by the synth tempo. */
+    const pose = {};
+    let stepOffset = 0;
+    addEventListener('trackchange', () => { stepOffset = (stepOffset + 1 + Math.floor(Math.random() * 3)) % 5; });
+    const ctx = { t: 0, beat: 0, phase: 0, bar: 0, step: 0, energy: 0, pulse: 0, d: 0, hx: 0 };
+
+    const energyNow = () => ctx.energy;
+    const actionNow = () => {
+      if (!hasPlaylist() || !player.playing) return 'dance';
+      return currentAction();
+    };
+
+    // eased 0..1 ramps used to shape a step within each beat
+    const bounce = (p) => Math.abs(Math.sin(p * Math.PI));
+    const sway = (p) => Math.sin(p * Math.PI * 2);
+
+    /* ── dance steps ──
+       Shoulder x stays within roughly [-1.5, 0.4] so the hands never travel
+       behind the back; sideways reach comes from shoulder z instead. */
+    const STEPS = [
+      // 0 — two-step: weight shifts side to side, arms pump low
+      (P, c) => {
+        const s = Math.sin(c.beat * Math.PI);
+        P.rootY = bounce(c.phase) * 0.1 * c.amp;
+        P.rootZ = s * 0.05;
+        P.torsoY = s * 0.22;
+        P.torsoZ = -s * 0.06;
+        P.shLX = -0.35 + s * 0.35; P.shRX = -0.35 - s * 0.35;
+        P.shLZ = 0.42 + Math.abs(s) * 0.12; P.shRZ = -0.42 - Math.abs(s) * 0.12;
+        P.elLX = -0.9 - s * 0.3; P.elRX = -0.9 + s * 0.3;
+        P.legLX = s * 0.16; P.legRX = -s * 0.16;
+        P.kneeL = Math.max(0, s) * 0.5; P.kneeR = Math.max(0, -s) * 0.5;
+        P.headZ = s * 0.08;
+      },
+      // 1 — knee lifts with alternating arm reach across the body
+      (P, c) => {
+        const s = Math.sin(c.beat * Math.PI);
+        const up = s > 0;
+        P.rootY = bounce(c.phase) * 0.14 * c.amp;
+        P.torsoY = s * 0.3;
+        P.shLX = up ? -1.15 : -0.25; P.shRX = up ? -0.25 : -1.15;
+        P.shLZ = 0.3; P.shRZ = -0.3;
+        P.elLX = up ? -1.5 : -0.7; P.elRX = up ? -0.7 : -1.5;
+        P.legLX = up ? -0.5 : 0.08; P.legRX = up ? 0.08 : -0.5;
+        P.kneeL = up ? 1.0 : 0.12; P.kneeR = up ? 0.12 : 1.0;
+        P.headY += s * 0.15;
+      },
+      // 2 — hands up, swaying overhead
+      (P, c) => {
+        const s = sway(c.phase);
+        P.rootY = bounce(c.phase) * 0.08 * c.amp;
+        P.rootZ = s * 0.07;
+        P.torsoZ = s * 0.1;
+        P.shLX = -1.45; P.shRX = -1.45;
+        P.shLZ = 0.55 + s * 0.18; P.shRZ = -0.55 + s * 0.18;
+        P.elLX = -0.5 + s * 0.2; P.elRX = -0.5 - s * 0.2;
+        P.legLX = 0.05; P.legRX = 0.05;
+        P.kneeL = 0.22 + bounce(c.phase) * 0.2; P.kneeR = 0.22 + bounce(c.phase) * 0.2;
+        P.headZ = s * 0.12;
+      },
+      // 3 — twist: hips and shoulders counter-rotate, arms trail
+      (P, c) => {
+        const s = Math.sin(c.beat * Math.PI * 0.5);
+        P.rootY = bounce(c.phase) * 0.07 * c.amp;
+        P.rootYaw = s * 0.35;
+        P.torsoY = -s * 0.5;
+        P.shLX = -0.6 - s * 0.25; P.shRX = -0.6 + s * 0.25;
+        P.shLZ = 0.5; P.shRZ = -0.5;
+        P.elLX = -1.25; P.elRX = -1.25;
+        P.legLX = 0.06; P.legRX = 0.06;
+        P.kneeL = 0.3; P.kneeR = 0.3;
+        P.headY += -s * 0.2;
+      },
+      // 4 — clap on the beat, heels bouncing
+      (P, c) => {
+        const hit = 1 - Math.min(1, c.phase * 3);
+        P.rootY = bounce(c.phase) * 0.09 * c.amp;
+        P.shLX = -1.1; P.shRX = -1.1;
+        P.shLZ = 0.18 + hit * 0.3; P.shRZ = -0.18 - hit * 0.3;
+        P.elLX = -1.5; P.elRX = -1.5;
+        P.torsoX = -0.06 - hit * 0.05;
+        P.legLX = 0.04; P.legRX = 0.04;
+        P.kneeL = 0.18 + bounce(c.phase) * 0.28; P.kneeR = 0.18 + bounce(c.phase) * 0.28;
+      }
+    ];
+
+    function poseDance(P, c) {
+      c.amp = 0.7 + c.energy * 0.9 + c.pulse * 0.3;
+      STEPS[c.step % STEPS.length](P, c);
+    }
+
+    function poseSway(P, c) {
+      const s = Math.sin(c.t * 1.1);
+      P.rootZ = s * 0.04;
+      P.torsoY = s * 0.14;
+      P.shLX = -0.15; P.shRX = -0.15;
+      P.shLZ = 0.16 + s * 0.05; P.shRZ = -0.16 + s * 0.05;
+      P.elLX = -0.5; P.elRX = -0.5;
+      P.kneeL = 0.06; P.kneeR = 0.06;
+      P.headZ = s * 0.06;
+    }
+
+    // sitting on a stool, strumming: left hand up the neck, right hand strums
+    function poseGuitar(P, c) {
+      const strum = Math.sin(c.beat * Math.PI * 2);
+      P.torsoLift = -0.42;               // sit down onto the stool
+      P.torsoX = -0.08;
+      P.torsoY = 0.16;
+      P.legLX = -1.35; P.legRX = -1.15;  // thighs forward
+      P.kneeL = 1.3; P.kneeR = 1.15;     // shins down
+      P.shLX = -0.75; P.shLZ = 0.85;     // fretting hand out along the neck
+      P.elLX = -1.35;
+      P.shRX = -0.5 + strum * 0.16; P.shRZ = -0.32;
+      P.elRX = -1.15 - strum * 0.2;      // strumming wrist
+      P.headX = 0.12; P.headY = -0.32;   // looking down at the fretboard
+      P.rootY = 0;
+    }
+
+    // turned away, face buried, shoulders shaking
+    function poseSad(P, c) {
+      const sob = Math.sin(c.t * 6.5) * 0.5 + Math.sin(c.t * 11) * 0.5;
+      P.rootYaw = Math.PI * 0.82;        // mostly turned from the viewer
+      P.torsoX = 0.3 + sob * 0.02;       // hunched forward
+      P.torsoLift = -0.06;
+      P.shLX = -1.45; P.shRX = -1.45;    // hands up to the face
+      P.shLZ = 0.34; P.shRZ = -0.34;
+      P.elLX = -1.9; P.elRX = -1.9;
+      P.headX = 0.34;
+      P.headY = 0; P.headZ = sob * 0.03;
+      P.legLX = 0.04; P.legRX = 0.04;
+      P.kneeL = 0.1; P.kneeR = 0.1;
+      P.rootY = Math.abs(sob) * 0.012;
+    }
+
+    /* ── props: a stool and a guitar, built once and shown per action ── */
+    let props = null;
+    function buildProps() {
+      const wood = new THREE.MeshPhysicalMaterial({ color: 0x6b4a2f, roughness: 0.55, clearcoat: 0.3, metalness: 0 });
+      const woodDark = new THREE.MeshPhysicalMaterial({ color: 0x4a3320, roughness: 0.6, metalness: 0 });
+      const metal = new THREE.MeshPhysicalMaterial({ color: 0xb9bdc4, roughness: 0.3, metalness: 0.85 });
+
+      const stool = new THREE.Group();
+      const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.07, 28), woodDark);
+      seat.position.y = 0.74; seat.castShadow = true;
+      stool.add(seat);
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2;
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.03, 0.76, 12), woodDark);
+        leg.position.set(Math.cos(a) * 0.2, 0.37, Math.sin(a) * 0.2);
+        leg.rotation.z = -Math.cos(a) * 0.14;
+        leg.rotation.x = Math.sin(a) * 0.14;
+        leg.castShadow = true;
+        stool.add(leg);
+      }
+      stool.position.set(0, 0, -0.05);
+
+      const guitar = new THREE.Group();
+      const bodyG = new THREE.Mesh(new THREE.SphereGeometry(0.24, 24, 18), wood);
+      bodyG.scale.set(1, 1.18, 0.34);
+      bodyG.castShadow = true;
+      const waist = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.045, 10, 24), wood);
+      waist.scale.set(1, 1.15, 0.4);
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.075, 24),
+        new THREE.MeshBasicMaterial({ color: 0x140d07 }));
+      hole.position.set(0, 0.03, 0.083);
+      const neck = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.72, 0.05), woodDark);
+      neck.position.set(0, 0.55, 0.02); neck.castShadow = true;
+      const headstock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.17, 0.04), woodDark);
+      headstock.position.set(0, 0.98, 0.02);
+      const strings = new THREE.Mesh(new THREE.BoxGeometry(0.055, 1.15, 0.006), metal);
+      strings.position.set(0, 0.42, 0.055);
+      guitar.add(bodyG, waist, hole, neck, headstock, strings);
+      // held across the body, neck up to the left
+      guitar.position.set(-0.02, 1.12, 0.34);
+      guitar.rotation.set(0.22, 0.1, 0.62);
+
+      props = { stool, guitar };
+      subject.root.add(stool, guitar);
+    }
+
+    function setProps(action, d) {
+      const wantGuitar = action === 'guitar' && d > 0.05;
+      if (!props) {
+        if (!wantGuitar) return;
+        buildProps();
+      }
+      props.stool.visible = wantGuitar;
+      props.guitar.visible = wantGuitar;
+    }
+
     // morph-target indices for blink / smile, when the model provides them
     const morphSet = (name, value) => {
       if (subject.kind !== 'glb') return;
@@ -525,9 +717,23 @@ function init(stage) {
       const t = elapsed;
       const wantDance = Math.max(zbDance, performance.now() < burstUntil ? 1 : 0);
       dance += (wantDance - dance) * Math.min(1, dt * 3);
-      const beat = (t * BPM) / 60;
-      const swing = Math.sin(beat * Math.PI);
       const d = (reduced ? 0 : dance);
+
+      // beat + loudness come from the playlist when it is playing, else from the
+      // fixed tempo of the generative synth
+      samplePlayer(dt);
+      const live = hasPlaylist() && player.playing;
+      const beat = live ? player.beat : (t * BPM) / 60;
+      const swing = Math.sin(beat * Math.PI);
+      ctx.t = t;
+      ctx.beat = beat;
+      ctx.phase = live ? player.beatPhase : (beat % 1);
+      ctx.bar = Math.floor(beat / 4);
+      ctx.energy = live ? player.energy : 0.45;
+      ctx.pulse = live ? player.pulse : 0;
+      ctx.d = d;
+      // change step every four bars, and on every track change
+      ctx.step = (Math.floor(ctx.bar / 4) + stepOffset) % 5;
 
       if (coarse && !touchDragging) {
         target.x += ((Math.sin(t * 0.42) * 0.75) - target.x) * Math.min(1, dt * 0.9);
@@ -536,9 +742,11 @@ function init(stage) {
       const hx = clamp(target.x, -1, 1);
       const hy = clamp(target.y, -1, 1);
 
-      subject.root.position.y = Math.abs(swing) * 0.17 * d;
-      subject.root.rotation.z = swing * 0.05 * d;
-      subject.root.rotation.y += ((hx * 0.16) - subject.root.rotation.y) * Math.min(1, dt * 3);
+      if (subject.kind !== 'figure') {
+        subject.root.position.y = Math.abs(swing) * 0.17 * d;
+        subject.root.rotation.z = swing * 0.05 * d;
+        subject.root.rotation.y += ((hx * 0.16) - subject.root.rotation.y) * Math.min(1, dt * 3);
+      }
 
       const breathe = Math.sin(t * 1.5) * 0.012;
 
@@ -556,28 +764,62 @@ function init(stage) {
         subject.blob.material.opacity = 0.13 - (m.position.y - subject.height / 2) * 0.06;
       } else if (subject.kind === 'figure') {
         const { torso, head, armL, armR, legL, legR, eyeL, eyeR } = subject.parts;
-        head.rotation.y += ((hx * 0.55) - head.rotation.y) * Math.min(1, dt * 6);
-        head.rotation.x += ((hy * 0.3) - head.rotation.x) * Math.min(1, dt * 6);
-        if (d > 0.01) head.rotation.x += Math.sin(beat * Math.PI * 2) * 0.08 * d;
+        const elbowL = armL.userData.elbow, elbowR = armR.userData.elbow;
+        const kneeL = legL.userData.knee, kneeR = legR.userData.knee;
 
+        // Pose targets, filled by the active action, then eased into.
+        // Shoulder x is kept in a forward-biased range so hands never swing
+        // behind the torso; z swings the arm out to the side instead.
+        const P = pose;
+        P.headX = hy * 0.3; P.headY = hx * 0.55; P.headZ = 0;
+        P.torsoX = 0; P.torsoY = 0; P.torsoZ = 0; P.torsoLift = 0;
+        P.shLX = 0; P.shLZ = 0.1; P.elLX = -0.45;
+        P.shRX = 0; P.shRZ = -0.1; P.elRX = -0.45;
+        P.legLX = 0; P.legRX = 0; P.kneeL = 0; P.kneeR = 0;
+        P.rootY = 0; P.rootZ = 0; P.rootYaw = 0;
+
+        if (d > 0.01) {
+          const A = actionNow();
+          if (A === 'guitar') poseGuitar(P, ctx);
+          else if (A === 'sad') poseSad(P, ctx);
+          else if (A === 'sway') poseSway(P, ctx);
+          else poseDance(P, ctx);
+        } else {
+          // idle: breathing and a slow weight shift
+          P.torsoZ = Math.sin(t * 0.5) * 0.03;
+          P.shLZ = 0.1 + breathe; P.shRZ = -0.1 - breathe;
+        }
+
+        setProps(actionNow(), d);
+
+        const k = Math.min(1, dt * (12 + 10 * energyNow()));
+        head.rotation.x += (P.headX - head.rotation.x) * Math.min(1, dt * 6);
+        head.rotation.y += (P.headY - head.rotation.y) * Math.min(1, dt * 6);
+        head.rotation.z += (P.headZ - head.rotation.z) * k;
         eyeL.position.x = -0.135 + hx * 0.02;
         eyeR.position.x = 0.135 + hx * 0.02;
 
+        torso.rotation.x += (P.torsoX - torso.rotation.x) * k;
+        torso.rotation.y += (P.torsoY - torso.rotation.y) * k;
+        torso.rotation.z += (P.torsoZ - torso.rotation.z) * k;
+        torso.position.y = 1.16 + P.torsoLift;
         torso.scale.y = 1 + breathe * (1 - d);
-        torso.rotation.z = Math.sin(t * 0.5) * 0.03 * (1 - d);
-        torso.rotation.y = Math.sin(beat * Math.PI * 0.5) * 0.35 * d;
 
-        const POCKET = { shX: -0.1, shZ: 0.1, elX: -0.45 };
-        armL.rotation.x = lerp(POCKET.shX, -0.7 + swing * 1.0, d);
-        armR.rotation.x = lerp(POCKET.shX, -0.7 - swing * 1.0, d);
-        armL.rotation.z = lerp(POCKET.shZ + breathe, 0.55 + Math.abs(swing) * 0.35, d);
-        armR.rotation.z = lerp(-POCKET.shZ - breathe, -0.55 - Math.abs(swing) * 0.35, d);
-        armL.userData.elbow.rotation.x = lerp(POCKET.elX, -1.2 + swing * 0.5, d);
-        armR.userData.elbow.rotation.x = lerp(POCKET.elX, -1.2 - swing * 0.5, d);
-        legL.rotation.x = swing * 0.26 * d;
-        legR.rotation.x = -swing * 0.26 * d;
-        legL.userData.knee.rotation.x = Math.max(0, -swing) * 0.35 * d;
-        legR.userData.knee.rotation.x = Math.max(0, swing) * 0.35 * d;
+        armL.rotation.x += (P.shLX - armL.rotation.x) * k;
+        armR.rotation.x += (P.shRX - armR.rotation.x) * k;
+        armL.rotation.z += (P.shLZ - armL.rotation.z) * k;
+        armR.rotation.z += (P.shRZ - armR.rotation.z) * k;
+        elbowL.rotation.x += (P.elLX - elbowL.rotation.x) * k;
+        elbowR.rotation.x += (P.elRX - elbowR.rotation.x) * k;
+
+        legL.rotation.x += (P.legLX - legL.rotation.x) * k;
+        legR.rotation.x += (P.legRX - legR.rotation.x) * k;
+        kneeL.rotation.x += (P.kneeL - kneeL.rotation.x) * k;
+        kneeR.rotation.x += (P.kneeR - kneeR.rotation.x) * k;
+
+        subject.root.position.y = P.rootY;
+        subject.root.rotation.z = P.rootZ;
+        subject.root.rotation.y += ((hx * 0.16 + P.rootYaw) - subject.root.rotation.y) * Math.min(1, dt * 3);
 
         nextBlink -= dt;
         if (nextBlink <= 0) { blinkT = 0; nextBlink = 2.4 + Math.random() * 3; }

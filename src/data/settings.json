@@ -69,21 +69,21 @@
       "title": "Purnota",
       "artist": "Warfaze",
       "src": "/assets/audio/04.-warfaze---purnota-music.com.bd-.mp3",
-      "bpm": "",
+      "bpm": "120",
       "action": "sway"
     },
     {
       "title": "Rupali Guitar",
       "artist": "Ayub Bachchu",
       "src": "/assets/audio/ayub-bachchu---rupali-guitar-music.com.bd-.mp3",
-      "bpm": "",
+      "bpm": "109",
       "action": "guitar"
     },
     {
       "title": "Bondho Janala",
       "artist": "Shironamhin",
       "src": "/assets/audio/01---shironamhin---bondho-janala-music.com.bd-.mp3",
-      "bpm": "",
+      "bpm": "95",
       "action": "dance"
     }
   ]

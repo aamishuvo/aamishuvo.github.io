@@ -64,5 +64,13 @@
   ],
   "cvUrl": "",
   "playlistMode": "sequential",
-  "playlist": []
+  "playlist": [
+    {
+      "title": "Purnota",
+      "artist": "Warfaze",
+      "src": "/assets/audio/04.-warfaze---purnota-music.com.bd-.mp3",
+      "bpm": "",
+      "action": "sway"
+    }
+  ]
 }

@@ -33,6 +33,21 @@ export function currentTrack() {
   return state.tracks[state.index] || null;
 }
 
+/** "2:07" / "127" / "1:02.5" → seconds. Blank or malformed returns 0. */
+export function parseTime(v) {
+  if (v === undefined || v === null) return 0;
+  const str = String(v).trim();
+  if (!str) return 0;
+  const parts = str.split(':').map((x) => parseFloat(x));
+  if (parts.some((n) => Number.isNaN(n))) return 0;
+  let secs = 0;
+  for (const n of parts) secs = secs * 60 + n;
+  return Math.max(0, secs);
+}
+
+function startOf(t) { return t ? parseTime(t.start) : 0; }
+function endOf(t) { return t ? parseTime(t.end) : 0; }
+
 /** Action the avatar should perform for the current track. */
 export function currentAction() {
   const t = currentTrack();
@@ -53,6 +68,11 @@ function ensureAudio() {
   const audio = new Audio();
   audio.crossOrigin = 'anonymous';
   audio.preload = 'none';
+  audio.addEventListener('loadedmetadata', () => {
+    // skip any silence at the head of the file
+    const from = startOf(currentTrack());
+    if (from > 0 && from < (audio.duration || Infinity)) audio.currentTime = from;
+  });
   audio.addEventListener('ended', () => next());
   audio.addEventListener('error', () => {
     // a missing or unplayable file should not stall the playlist
@@ -167,11 +187,18 @@ export function sample(dt) {
   state.lastLow = low;
 
   const t = currentTrack();
+  const from = startOf(t), to = endOf(t);
+  if (to > from && state.audio.currentTime >= to) { next(); return; }
+  // if the seek to the start offset was missed (preload can delay metadata),
+  // catch it here so playback never sits in the silent lead-in
+  if (from > 0 && state.audio.currentTime < from - 0.05 && state.audio.readyState > 0) {
+    state.audio.currentTime = from;
+  }
   const bpm = (t && Number(t.bpm)) > 0 ? Number(t.bpm) : 100;
-  const beats = (state.audio.currentTime * bpm) / 60;
-  state.beat = beats;
-  state.beatPhase = beats % 1;
-  state.bar = Math.floor(beats / 4);
+  const beats = Math.max(0, ((state.audio.currentTime - from) * bpm) / 60);
+  state.beat = Number.isFinite(beats) ? beats : 0;
+  state.beatPhase = state.beat % 1;
+  state.bar = Math.floor(state.beat / 4);
 }
 
 /* ── transport UI ───────────────────────────────── */
